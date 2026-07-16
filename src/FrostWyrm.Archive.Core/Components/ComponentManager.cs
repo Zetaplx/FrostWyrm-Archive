@@ -6,7 +6,7 @@ namespace FrostWyrm.Archive.Core.Components;
 
 public sealed class ComponentManager : ECSManager
 {
-    [Dependency] private readonly EntityManager _entityManager = default!;
+    [Dependency] private EntityManager _entityManager = default!;
     private readonly Dictionary<Type, IComponentStore> _stores = new();
 
     /// <summary>

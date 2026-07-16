@@ -9,7 +9,7 @@ namespace FrostWyrm.Archive.Core.Entities;
 /// </summary>
 public sealed class EntityManager : ECSManager
 {
-    [Dependency] private readonly ComponentManager _componentManager = default!;
+    [Dependency] private ComponentManager _componentManager = default!;
 
     private readonly List<uint> _generations = new();
     private readonly HashSet<int> _alive = new();

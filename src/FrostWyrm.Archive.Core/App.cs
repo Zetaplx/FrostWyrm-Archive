@@ -15,6 +15,7 @@ public sealed class App
 
     public void Build(params Assembly[] assemblies)
     {
+        IoCManager.DiscoverFromAssembly(typeof(App).Assembly); // Always include core
         foreach (var assembly in assemblies)
             IoCManager.DiscoverFromAssembly(assembly);
         IoCManager.Build();

@@ -1,144 +1,145 @@
+using FrostWyrm.Archive.Core;
 using FrostWyrm.Archive.Core.Entities;
 
 namespace FrostWyrm.Archive.Test.Entities;
 
-public sealed class EntityManagerLifeCycleTests
+public sealed class EntityManagerLifeCycleTests : IDisposable
 {
+    private readonly App _app;
+    private readonly EntityManager _manager;
+
+    public EntityManagerLifeCycleTests()
+    {
+        _app = new AppBuilder().Build();
+        _app.IoCManager.TryResolve(out _manager);
+    }
+
+    public void Dispose()
+    {
+        _app.Shutdown();
+    }
+
     [Fact]
     public void CreateReturnsLivingEntity()
     {
-        var manager = new EntityManager();
-
-        var uid = manager.Create();
+        var uid = _manager.Create();
 
         Assert.True(uid.IsValid);
-        Assert.True(manager.Exists(uid));
-        Assert.Equal(1, manager.Count);
+        Assert.True(_manager.Exists(uid));
+        Assert.Equal(1, _manager.Count);
     }
 
     [Fact]
     public void CreateReturnsDistinctEntities()
     {
-        var manager = new EntityManager();
-
-        var first = manager.Create();
-        var second = manager.Create();
+        var first = _manager.Create();
+        var second = _manager.Create();
 
         Assert.NotEqual(first, second);
-        Assert.True(manager.Exists(first));
-        Assert.True(manager.Exists(second));
-        Assert.Equal(2, manager.Count);
+        Assert.True(_manager.Exists(first));
+        Assert.True(_manager.Exists(second));
+        Assert.Equal(2, _manager.Count);
     }
 
     [Fact]
     public void DestroyRemovesLivingEntity()
     {
-        var manager = new EntityManager();
-        var uid = manager.Create();
+        var uid = _manager.Create();
 
-        var destroyed = manager.Destroy(uid);
+        var destroyed = _manager.Destroy(uid);
 
         Assert.True(destroyed);
-        Assert.False(manager.Exists(uid));
-        Assert.Equal(0, manager.Count);
+        Assert.False(_manager.Exists(uid));
+        Assert.Equal(0, _manager.Count);
     }
 
     [Fact]
     public void DestroyReturnsFalseForInvalidUid()
     {
-        var manager = new EntityManager();
-
-        var destroyed = manager.Destroy(EntityUid.Invalid);
+        var destroyed = _manager.Destroy(EntityUid.Invalid);
 
         Assert.False(destroyed);
-        Assert.Equal(0, manager.Count);
+        Assert.Equal(0, _manager.Count);
     }
 
     [Fact]
     public void DestroyReturnsFalseForAlreadyDestroyedEntity()
     {
-        var manager = new EntityManager();
-        var uid = manager.Create();
+        var uid = _manager.Create();
 
-        Assert.True(manager.Destroy(uid));
-        Assert.False(manager.Destroy(uid));
-        Assert.Equal(0, manager.Count);
+        Assert.True(_manager.Destroy(uid));
+        Assert.False(_manager.Destroy(uid));
+        Assert.Equal(0, _manager.Count);
     }
 
     [Fact]
     public void DestroyDoesNotAffectOtherEntities()
     {
-        var manager = new EntityManager();
-        var first = manager.Create();
-        var second = manager.Create();
+        var first = _manager.Create();
+        var second = _manager.Create();
 
-        manager.Destroy(first);
+        _manager.Destroy(first);
 
-        Assert.False(manager.Exists(first));
-        Assert.True(manager.Exists(second));
-        Assert.Equal(1, manager.Count);
+        Assert.False(_manager.Exists(first));
+        Assert.True(_manager.Exists(second));
+        Assert.Equal(1, _manager.Count);
     }
 
     [Fact]
     public void DestroyedIndexIsReusedWithNewGeneration()
     {
-        var manager = new EntityManager();
-        var oldUid = manager.Create();
+        var oldUid = _manager.Create();
 
-        manager.Destroy(oldUid);
-        var newUid = manager.Create();
+        _manager.Destroy(oldUid);
+        var newUid = _manager.Create();
 
         Assert.Equal(oldUid.Index, newUid.Index);
         Assert.Equal(oldUid.Generation + 1, newUid.Generation);
 
-        Assert.False(manager.Exists(oldUid));
-        Assert.True(manager.Exists(newUid));
+        Assert.False(_manager.Exists(oldUid));
+        Assert.True(_manager.Exists(newUid));
     }
 
     [Fact]
     public void StaleUidCannotDestroyReplacementEntity()
     {
-        var manager = new EntityManager();
-        var staleUid = manager.Create();
+        var staleUid = _manager.Create();
 
-        manager.Destroy(staleUid);
-        var replacementUid = manager.Create();
+        _manager.Destroy(staleUid);
+        var replacementUid = _manager.Create();
 
-        var destroyed = manager.Destroy(staleUid);
+        var destroyed = _manager.Destroy(staleUid);
 
         Assert.False(destroyed);
-        Assert.True(manager.Exists(replacementUid));
-        Assert.Equal(1, manager.Count);
+        Assert.True(_manager.Exists(replacementUid));
+        Assert.Equal(1, _manager.Count);
     }
 
     [Fact]
     public void ExistsReturnsFalseForUnknownIndex()
     {
-        var manager = new EntityManager();
         var unknownUid = new EntityUid(50, 0);
 
-        Assert.False(manager.Exists(unknownUid));
+        Assert.False(_manager.Exists(unknownUid));
     }
 
     [Fact]
     public void FreeIndicesAreReusedBeforeCreatingNewSlots()
     {
-        var manager = new EntityManager();
+        var first = _manager.Create();
+        var second = _manager.Create();
+        var third = _manager.Create();
 
-        var first = manager.Create();
-        var second = manager.Create();
-        var third = manager.Create();
+        _manager.Destroy(second);
 
-        manager.Destroy(second);
-
-        var replacement = manager.Create();
+        var replacement = _manager.Create();
 
         Assert.Equal(second.Index, replacement.Index);
         Assert.NotEqual(second.Generation, replacement.Generation);
-        Assert.Equal(3, manager.Count);
+        Assert.Equal(3, _manager.Count);
 
-        Assert.True(manager.Exists(first));
-        Assert.True(manager.Exists(third));
-        Assert.True(manager.Exists(replacement));
+        Assert.True(_manager.Exists(first));
+        Assert.True(_manager.Exists(third));
+        Assert.True(_manager.Exists(replacement));
     }
 }
