@@ -92,13 +92,13 @@ public sealed class ComponentManager : ECSManager
             yield return uid;
     }
 
-    public IEnumerable<EntityUid> Query<TComponent1, TComponent2>() 
-        where TComponent1 : IComponent 
+    public IEnumerable<EntityUid> Query<TComponent1, TComponent2>()
+        where TComponent1 : IComponent
         where TComponent2 : IComponent
     {
         if (!TryGetTypedStore<TComponent1>(out var store1) || !TryGetTypedStore<TComponent2>(out var store2))
             yield break;
-        
+
         var combined = store1.Ids().Intersect(store2.Ids());
         foreach (var uid in combined)
             yield return uid;
@@ -106,17 +106,28 @@ public sealed class ComponentManager : ECSManager
 
     public IEnumerable<EntityUid> Query(params Type[] types)
     {
+        IEnumerable<EntityUid>? ids = null;
         foreach (var type in types)
         {
-            if(!typeof(IComponent).IsAssignableFrom(type))
+            if (!typeof(IComponent).IsAssignableFrom(type))
                 throw new InvalidOperationException($"Invalid component type {type.FullName}. Queried types must inherit IComponent.");
-            
+
             if (!_stores.TryGetValue(type, out var store))
                 continue;
-            
-            foreach (var uid in store.Ids())
-                yield return uid;
+
+            if (ids == null)
+            {
+                ids = store.Ids().ToList();
+                continue;
+            }
+
+            ids = ids.Intersect(store.Ids());
         }
+        if (ids is null)
+            yield break;
+
+        foreach (var uid in ids)
+            yield return uid;
     }
     #endregion
 }
