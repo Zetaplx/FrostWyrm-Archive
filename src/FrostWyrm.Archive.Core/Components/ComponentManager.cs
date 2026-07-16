@@ -4,27 +4,34 @@ namespace FrostWyrm.Archive.Core.Components;
 
 public sealed class ComponentManager
 {
-    private Dictionary<Type, IComponentStore> _stores = new();
+    private readonly EntityManager _entityManager = default!;
+    private readonly Dictionary<Type, IComponentStore> _stores = new();
+
+    public ComponentManager(EntityManager entityManager)
+    {
+        _entityManager = entityManager;
+    }
 
     /// <summary>
-    /// Adds a entity to the store for a given component type. Creates a new store if one does not exist.
+    /// Adds a component to an entity, creating a store for the component type if
+    /// one does not already exist.
     /// </summary>
-    public void AddComponent<TComponent>(EntityUid uid, TComponent component) where TComponent : IComponent
+    public bool AddComponent<TComponent>(EntityUid uid, TComponent component) where TComponent : IComponent
     {
-        if (!uid.IsValid)
-            return;
-        
+        if (!_entityManager.Exists(uid))
+            return false;
+
         if (_stores.TryGetValue(typeof(TComponent), out var store))
         {
-            if (store.Has(uid)) return;
-            if (store is not ComponentStore<TComponent> typedStore) return;
-            
-            typedStore.Add(uid, component);
-            return;
+            if (store is not ComponentStore<TComponent> typedStore)
+                throw new InvalidOperationException($"Component store for {typeof(TComponent)} has an incompatible type.");
+
+
+            return typedStore.Add(uid, component);
         }
 
         var newStore = new ComponentStore<TComponent>();
-        newStore.Add(uid, component);
         _stores.Add(typeof(TComponent), newStore);
+        return newStore.Add(uid, component);
     }
 }

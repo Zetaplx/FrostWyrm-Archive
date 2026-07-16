@@ -4,7 +4,7 @@ namespace FrostWyrm.Archive.Core.Components;
 
 public sealed class ComponentStore<TComponent> : IComponentStore where TComponent : IComponent
 {
-    public Dictionary<EntityUid, TComponent> _components = new();
+    private readonly Dictionary<EntityUid, TComponent> _components = new();
 
     public int Count => _components.Count;
 
@@ -22,10 +22,7 @@ public sealed class ComponentStore<TComponent> : IComponentStore where TComponen
     public bool Remove(EntityUid uid) => Remove(uid, out _);
     public bool Remove(EntityUid uid, out TComponent removed)
     {
-        if (!_components.TryGetValue(uid, out removed!))
-            return false;
-        
-        return _components.Remove(uid);
+        return _components.Remove(uid, out removed!);
     }
 
     public bool TryGet(EntityUid uid, out TComponent component)
@@ -36,7 +33,7 @@ public sealed class ComponentStore<TComponent> : IComponentStore where TComponen
 
     public void Clear()
     {
-        throw new NotImplementedException();
+        _components.Clear();
     }
 }
 
