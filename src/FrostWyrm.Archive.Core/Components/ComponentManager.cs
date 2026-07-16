@@ -1,16 +1,13 @@
 using FrostWyrm.Archive.Core.Entities;
+using FrostWyrm.Archive.Core.IoC;
+using FrostWyrm.Archive.Core.Systems;
 
 namespace FrostWyrm.Archive.Core.Components;
 
-public sealed class ComponentManager
+public sealed class ComponentManager : ECSManager
 {
-    private readonly EntityManager _entityManager = default!;
+    [Dependency] private readonly EntityManager _entityManager = default!;
     private readonly Dictionary<Type, IComponentStore> _stores = new();
-
-    public ComponentManager(EntityManager entityManager)
-    {
-        _entityManager = entityManager;
-    }
 
     /// <summary>
     /// Adds a component to an entity, creating a store for the component type if

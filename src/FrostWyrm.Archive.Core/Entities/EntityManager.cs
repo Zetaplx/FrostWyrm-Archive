@@ -1,10 +1,16 @@
+using FrostWyrm.Archive.Core.Components;
+using FrostWyrm.Archive.Core.IoC;
+using FrostWyrm.Archive.Core.Systems;
+
 namespace FrostWyrm.Archive.Core.Entities;
 
 /// <summary>
 /// Creates, destroys, and tracks entities within an App.
 /// </summary>
-public sealed class EntityManager
+public sealed class EntityManager : ECSManager
 {
+    [Dependency] private readonly ComponentManager _componentManager = default!;
+
     private readonly List<uint> _generations = new();
     private readonly HashSet<int> _alive = new();
     private readonly Stack<int> _freeIndices = new();
@@ -55,6 +61,8 @@ public sealed class EntityManager
     {
         if (!Exists(uid))
             return false;
+
+        _componentManager.RemoveAllComponents(uid);
         
         _alive.Remove(uid.Index);
         _generations[uid.Index] = checked(_generations[uid.Index] + 1);
