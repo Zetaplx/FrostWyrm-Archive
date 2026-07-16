@@ -7,7 +7,8 @@ public abstract class EntitySystem : ECSManager
 
 public abstract class ECSManager
 {
-    public virtual void Initialize() { }
+    public bool Initialized = false;
+    public virtual void Initialize() { Initialized = true; }
     public virtual void Shutdown() { }
 
     public ECSManager() { }

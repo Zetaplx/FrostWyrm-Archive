@@ -1,5 +1,6 @@
 using System.Reflection;
 using FrostWyrm.Archive.Core;
+using FrostWyrm.Archive.Core.Systems;
 
 public sealed class AppBuilder
 {
@@ -10,6 +11,9 @@ public sealed class AppBuilder
         _assemblies.Add(assembly);
         return this;
     }
+
+    public AppBuilder AddAssemblyContaining<TDependency>() where TDependency : ECSManager
+        => AddAssembly(typeof(TDependency).Assembly);
 
     public App Build()
     {

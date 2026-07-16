@@ -1,6 +1,6 @@
 using FrostWyrm.Archive.Core.Entities;
 
-namespace FrostWyrm.Archive.Test;
+namespace FrostWyrm.Archive.Test.Entities;
 
 public sealed class EntityManagerLifeCycleTests
 {

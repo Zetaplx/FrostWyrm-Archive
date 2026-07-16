@@ -7,26 +7,26 @@ namespace FrostWyrm.Archive.Core;
 
 public sealed class App
 {
-    private readonly IoCManager _iocManager;
+    public readonly IoCManager IoCManager;
     public App()
     {
-        _iocManager = new IoCManager();
+        IoCManager = new IoCManager();
     }
 
     public void Build(params Assembly[] assemblies)
     {
         foreach (var assembly in assemblies)
-            _iocManager.DiscoverFromAssembly(assembly);
-        _iocManager.Build();
+            IoCManager.DiscoverFromAssembly(assembly);
+        IoCManager.Build();
     }
 
     public void Update(float frameTime)
     {
-        _iocManager.Update(frameTime);
+        IoCManager.Update(frameTime);
     }
 
     public void Shutdown()
     {
-        _iocManager.Shutdown();
+        IoCManager.Shutdown();
     }
 }
