@@ -6,7 +6,7 @@
 - [x] Create GitHub repository
 - [x] Create solution
 - [x] Create folder structure
-- [ ] Create Core project
+- [X] Create Core project
 
 ### ECS Foundation
 - [ ] EntityId
