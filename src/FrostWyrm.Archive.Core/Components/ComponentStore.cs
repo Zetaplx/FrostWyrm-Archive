@@ -35,6 +35,9 @@ public sealed class ComponentStore<TComponent> : IComponentStore where TComponen
     {
         _components.Clear();
     }
+
+    public IEnumerable<(EntityUid uid, TComponent comp)> All() => _components.Keys.Select(key => (key, _components[key]));
+    public IEnumerable<EntityUid> Ids() => _components.Keys;
 }
 
 public interface IComponentStore
@@ -43,6 +46,8 @@ public interface IComponentStore
 
     bool Remove(EntityUid uid);
     bool Has(EntityUid uid);
+
+    IEnumerable<EntityUid> Ids();
 
     void Clear();
 }

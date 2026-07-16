@@ -6,13 +6,18 @@ public sealed class AppBuilder
 {
     private readonly List<Assembly> _assemblies = new();
 
+    public AppBuilder()
+    {
+        AddAssemblyContaining<CoreModule>(); // Always include core
+    }
+
     public AppBuilder AddAssembly(Assembly assembly)
     {
         _assemblies.Add(assembly);
         return this;
     }
 
-    public AppBuilder AddAssemblyContaining<TDependency>() where TDependency : ECSManager
+    public AppBuilder AddAssemblyContaining<TDependency>()
         => AddAssembly(typeof(TDependency).Assembly);
 
     public App Build()
