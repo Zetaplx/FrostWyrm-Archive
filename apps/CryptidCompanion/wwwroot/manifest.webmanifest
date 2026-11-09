@@ -1,0 +1,1 @@
+{"name":"Cryptid Companion","short_name":"Cryptid","description":"A solo field companion for your physical Cryptid board.","start_url":".","scope":".","display":"standalone","background_color":"#f7f5eb","theme_color":"#153f35","icons":[{"src":"companion-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}

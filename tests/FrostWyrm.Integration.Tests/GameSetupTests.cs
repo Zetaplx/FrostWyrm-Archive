@@ -68,6 +68,7 @@ public sealed class GameSetupTests
     private static GameManager CreateGame()
     {
         var dependencies = new DependencyManager();
+        dependencies.Register(new CryptidCompanion.Domain.ContentCatalog());
         dependencies.Register(new SerializationManager());
         var prototypes = new PrototypeManager();
         dependencies.Register(prototypes);

@@ -1,69 +1,70 @@
-﻿@page "/"
-@inject GameManager GameManager
+@page "/"
+@inject ContentCatalog Catalog
+@inject GameManager Game
+@inject CompanionState State
+@inject BrowserSessionStore Storage
 @inject NavigationManager Navigation
-
-<PageTitle>Cryptid Digital Companion</PageTitle>
-
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <h1 class="text-center mb-4">
-                Cryptid Digital Companion
-            </h1>
-
-            <div class="mb-3">
-                <label for="cardNumber" class="form-label">
-                    Card Number
-                </label>
-
-                <InputNumber id="cardNumber"
-                             class="form-control"
-                             @bind-Value="_cardNumber" />
-            </div>
-
-            <div class="mb-4">
-                <label for="playerCount" class="form-label">
-                    Player Count
-                </label>
-
-                <InputSelect id="playerCount"
-                             class="form-select"
-                             @bind-Value="_playerCount">
-                    <option value="3">3 Players</option>
-                    <option value="4">4 Players</option>
-                    <option value="5">5 Players</option>
-                </InputSelect>
-            </div>
-
-            <button class="btn btn-primary w-100"
-                    @onclick="StartGame">
-                Start Game
-            </button>
-
-            @if (_error is not null)
-            {
-                <p class="text-danger mt-3" role="alert">@_error</p>
-            }
-        </div>
+<PageTitle>Cryptid Companion · Base camp</PageTitle>
+<section class="hero">
+    <div><p class="eyebrow">A SOLO EXPEDITION / NORMAL MODE</p><h1>One explorer.<br /><em>Many hidden clues.</em></h1>
+        <p class="lede">Bring your physical board. We’ll hold the other clues.<br />The questions, the search, the discovery — those are yours.</p>
+        <div class="badges"><span>3–5 clue-holders</span><span>Physical board required</span><span>Works offline</span></div>
     </div>
-</div>
-
-@code
+    <div class="hero-art" aria-hidden="true"><div class="contour c1"></div><div class="contour c2"></div><div class="contour c3"></div><div class="compass">✧</div><small>THE HABITAT IS OUT THERE.</small></div>
+</section>
+@if (Game.HasSession)
 {
-    private int _cardNumber = 4;
-    private int _playerCount = 3;
-    private string? _error;
-
-    private void StartGame()
+    <section class="panel active-game"><div><p class="eyebrow">YOUR FIELD JOURNAL IS OPEN</p><h2>@Game.Card!.Name</h2><p>@Game.PlayerCount clue-holders · You are @Game.HumanBook · @Game.History.Count actions recorded</p></div>
+        <a class="button" href="@(Game.Phase == SessionPhase.Opening ? "opening" : "game")">Resume expedition →</a>
+        @if (!_confirm) { <button class="quiet" @onclick="() => _confirm = true">End this game</button> }
+        else { <div><p>End this game and clear its saved journal?</p><button class="danger" @onclick="EndGame">End game</button> <button class="quiet" @onclick="() => _confirm = false">Keep playing</button></div> }
+    </section>
+}
+else
+{
+    <section class="two-up"><div class="panel"><p class="eyebrow">01 / PLAN YOUR EXPEDITION</p><h2>Set the table.</h2>
+        <label for="card">Setup</label><select id="card" @bind="State.DraftCard" @bind:after="UpdatePlayers">
+            @foreach (var card in Catalog.Cards) { <option value="@card.ID">@card.Name</option> }
+        </select>
+        <p class="field-note">@SelectedCard?.Source</p>
+        <label for="players">Clue-holders, including you</label><select id="players" @bind="State.DraftPlayers">
+            @foreach (var setup in SelectedCard?.Setups ?? new()) { <option value="@setup.PlayerCount">@setup.PlayerCount players</option> }
+        </select>
+        <button class="button full" @onclick="Prepare" disabled="@(SelectedCard is null)">Prepare the board →</button>
+    </div><div class="panel muted-panel"><p class="eyebrow">HOW IT WORKS</p><h2>Hidden information.<br />Human intuition.</h2>
+        <ol class="steps"><li>Build the reference board with your physical tiles.</li><li>Choose your clue. The other clues stay hidden.</li><li>Transfer opening cubes to the board.</li><li>Ask questions and search. Find the one shared habitat.</li></ol>
+        <p>No automated opponents. No suggested moves. Just honest answers to the questions you choose.</p>
+        <a href="rules">Read the field guide →</a>
+    </div></section>
+    <details class="panel"><summary>Content packs & printed cards</summary>
+        <p>The included setup reproduces the provided reference image. It is not assigned an unverified printed card number. Printed card 4 currently has clue-number references only; it is not offered as playable. Add verified board and clue definitions as a YAML content pack.</p>
+        <label for="content">Import YAML content pack</label><InputFile id="content" OnChange="Import" accept=".yml,.yaml" />
+        @if (_importMessage is not null) { <pre role="status">@_importMessage</pre> }
+    </details>
+}
+@code {
+    private bool _confirm;
+    private string? _importMessage;
+    private SetupCardPrototype? SelectedCard => Catalog.Cards.FirstOrDefault(c => c.ID == State.DraftCard);
+    protected override void OnInitialized()
+    {
+        if (SelectedCard is null && Catalog.Cards.Count > 0) State.DraftCard = Catalog.Cards[0].ID;
+        UpdatePlayers();
+    }
+    private void Prepare() => Navigation.NavigateTo("setup");
+    private void UpdatePlayers()
+    {
+        if (SelectedCard is { } card && !card.Setups.Any(s => s.PlayerCount == State.DraftPlayers)) State.DraftPlayers = card.Setups[0].PlayerCount;
+    }
+    private async Task EndGame() { Game.Clear(); await Storage.Save(); _confirm = false; }
+    private async Task Import(InputFileChangeEventArgs change)
     {
         try
         {
-            GameManager.SetupStart(_cardNumber, _playerCount);
-            Navigation.NavigateTo("/setup");
+            using var reader = new StreamReader(change.File.OpenReadStream(2 * 1024 * 1024));
+            await Storage.Import(Path.GetFileName(change.File.Name), await reader.ReadToEndAsync());
+            _importMessage = "Content validated and loaded.";
         }
-        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
-        {
-            _error = exception.Message;
-        }
+        catch (Exception exception) { _importMessage = exception.Message; }
     }
 }

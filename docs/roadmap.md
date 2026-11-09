@@ -43,6 +43,10 @@
 
 ### Example
 - [x] Blazor Module
-- [x] CryptidCompanion setup-card demonstration
+- [x] CryptidCompanion playable reference setup (3–5 clue-holders)
+- [x] Normal Mode clues, board rendering, legal questions/searches and penalties
+- [x] Saved sessions and offline PWA
+- [x] Domain and browser end-to-end validation
+- [ ] Additional verified printed setup-card and clue-book data
 - [ ] CLI Module
 - [ ] Notes example

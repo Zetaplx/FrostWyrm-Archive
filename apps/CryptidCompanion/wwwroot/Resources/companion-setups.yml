@@ -1,0 +1,57 @@
+# User-provided reference layout. Tile orientations and structure types confirmed by user.
+- type: board
+  id: companion-board
+  orientation: FlatTop
+  rows: 9
+  columns: 12
+  tiles:
+  - tile: tile5
+    origin: {row: 0, column: 0}
+    flipped: true
+  - tile: tile4
+    origin: {row: 0, column: 6}
+    flipped: false
+  - tile: tile1
+    origin: {row: 3, column: 0}
+    flipped: true
+  - tile: tile6
+    origin: {row: 3, column: 6}
+    flipped: true
+  - tile: tile2
+    origin: {row: 6, column: 0}
+    flipped: false
+  - tile: tile3
+    origin: {row: 6, column: 6}
+    flipped: true
+  structures:
+  - position: {row: 0, column: 3}
+    kind: Stone
+    color: White
+  - position: {row: 3, column: 3}
+    kind: Shack
+    color: White
+  - position: {row: 1, column: 8}
+    kind: Shack
+    color: Blue
+  - position: {row: 4, column: 7}
+    kind: Stone
+    color: Blue
+  - position: {row: 4, column: 8}
+    kind: Shack
+    color: Green
+  - position: {row: 8, column: 7}
+    kind: Stone
+    color: Green
+
+- type: setupCard
+  id: companion-1
+  name: Reference expedition
+  source: User-provided reference layout using the six physical tiles. Not assigned a printed card number.
+  board: companion-board
+  setups:
+  - playerCount: 3
+    books: [Alpha, Beta, Gamma]
+  - playerCount: 4
+    books: [Alpha, Beta, Gamma, Delta]
+  - playerCount: 5
+    books: [Alpha, Beta, Gamma, Delta, Epsilon]

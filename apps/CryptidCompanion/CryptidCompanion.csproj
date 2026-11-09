@@ -4,6 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    <PublishTrimmed>false</PublishTrimmed>
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
   </PropertyGroup>
 
@@ -18,4 +20,7 @@
     <ProjectReference Include="..\..\src\FrostWyrm.Math\FrostWyrm.Math.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ServiceWorker Include="wwwroot/service-worker.js" PublishedContent="wwwroot/service-worker.published.js" />
+  </ItemGroup>
 </Project>

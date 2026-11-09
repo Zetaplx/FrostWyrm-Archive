@@ -1,0 +1,150 @@
+- type: clue
+  id: water-forest
+  text: In water or forest
+  rule: TerrainPair
+  terrains: [Water, Forest]
+
+- type: clue
+  id: water-desert
+  text: In water or desert
+  rule: TerrainPair
+  terrains: [Water, Desert]
+
+- type: clue
+  id: water-mountain
+  text: In water or mountain
+  rule: TerrainPair
+  terrains: [Water, Mountain]
+
+- type: clue
+  id: water-swamp
+  text: In water or swamp
+  rule: TerrainPair
+  terrains: [Water, Swamp]
+
+- type: clue
+  id: forest-desert
+  text: In forest or desert
+  rule: TerrainPair
+  terrains: [Forest, Desert]
+
+- type: clue
+  id: forest-mountain
+  text: In forest or mountain
+  rule: TerrainPair
+  terrains: [Forest, Mountain]
+
+- type: clue
+  id: forest-swamp
+  text: In forest or swamp
+  rule: TerrainPair
+  terrains: [Forest, Swamp]
+
+- type: clue
+  id: desert-mountain
+  text: In desert or mountain
+  rule: TerrainPair
+  terrains: [Desert, Mountain]
+
+- type: clue
+  id: desert-swamp
+  text: In desert or swamp
+  rule: TerrainPair
+  terrains: [Desert, Swamp]
+
+- type: clue
+  id: mountain-swamp
+  text: In mountain or swamp
+  rule: TerrainPair
+  terrains: [Mountain, Swamp]
+
+- type: clue
+  id: near-water
+  text: Within 1 space of water
+  rule: NearTerrain
+  terrains: [Water]
+  distance: 1
+
+- type: clue
+  id: near-forest
+  text: Within 1 space of forest
+  rule: NearTerrain
+  terrains: [Forest]
+  distance: 1
+
+- type: clue
+  id: near-desert
+  text: Within 1 space of desert
+  rule: NearTerrain
+  terrains: [Desert]
+  distance: 1
+
+- type: clue
+  id: near-mountain
+  text: Within 1 space of mountain
+  rule: NearTerrain
+  terrains: [Mountain]
+  distance: 1
+
+- type: clue
+  id: near-swamp
+  text: Within 1 space of swamp
+  rule: NearTerrain
+  terrains: [Swamp]
+  distance: 1
+
+- type: clue
+  id: near-animal
+  text: Within 1 space of any animal territory
+  rule: NearAnimal
+  animal: None
+  distance: 1
+
+- type: clue
+  id: near-bear
+  text: Within 2 spaces of bear territory
+  rule: NearAnimal
+  animal: Bear
+  distance: 2
+
+- type: clue
+  id: near-cougar
+  text: Within 2 spaces of cougar territory
+  rule: NearAnimal
+  animal: Cougar
+  distance: 2
+
+- type: clue
+  id: near-stone
+  text: Within 2 spaces of a standing stone
+  rule: NearStructure
+  structure: Stone
+  distance: 2
+
+- type: clue
+  id: near-shack
+  text: Within 2 spaces of a abandoned shack
+  rule: NearStructure
+  structure: Shack
+  distance: 2
+
+- type: clue
+  id: near-blue
+  text: Within 3 spaces of a blue structure
+  rule: NearColor
+  color: Blue
+  distance: 3
+
+- type: clue
+  id: near-green
+  text: Within 3 spaces of a green structure
+  rule: NearColor
+  color: Green
+  distance: 3
+
+- type: clue
+  id: near-white
+  text: Within 3 spaces of a white structure
+  rule: NearColor
+  color: White
+  distance: 3

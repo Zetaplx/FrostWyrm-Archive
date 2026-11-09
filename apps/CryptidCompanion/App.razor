@@ -1,6 +1,39 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-</Router>
+@inject CompanionState State
+@inject BrowserSessionStore Storage
+
+<header class="site-header">
+    <a href="" class="wordmark"><span class="brand-mark">⌁</span> CRYPTID <span>COMPANION</span></a>
+    <nav aria-label="Main navigation"><a href="">Camp</a><a href="rules">Field guide</a></nav>
+</header>
+<main class="shell">
+    @if (State.Errors.Count > 0)
+    {
+        <section class="panel" role="alert"><p class="eyebrow">CONTENT CHECK</p><h1>We couldn’t load this expedition.</h1>
+            <p>Correct the following content definitions and reload:</p>
+            <ul>@foreach (var error in State.Errors) { <li>@error</li> }</ul>
+        </section>
+    }
+    else if (!_loaded) { <p role="status">Opening the field journal…</p> }
+    else
+    {
+        @if (State.Notice is not null)
+        {
+            <aside class="notice" role="status">@State.Notice <button class="quiet" @onclick="() => State.Notice = null">Dismiss</button></aside>
+        }
+        <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+            <Found Context="routeData"><RouteView RouteData="@routeData" /><FocusOnNavigate RouteData="@routeData" Selector="h1" /></Found>
+        </Router>
+    }
+</main>
+<footer class="site-footer">An independent field companion for owners of Cryptid. Keep your board on the table, your clues to yourself.</footer>
+
+@code {
+    private bool _loaded;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || State.Errors.Count > 0) return;
+        await Storage.Initialize();
+        _loaded = true;
+        StateHasChanged();
+    }
+}

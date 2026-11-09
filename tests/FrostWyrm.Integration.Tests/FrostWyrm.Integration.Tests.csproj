@@ -26,6 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../../apps/CryptidCompanion/wwwroot/Resources/setup-cards.yml" Link="Resources/setup-cards.yml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../apps/CryptidCompanion/wwwroot/Resources/*.yml" Link="Resources/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

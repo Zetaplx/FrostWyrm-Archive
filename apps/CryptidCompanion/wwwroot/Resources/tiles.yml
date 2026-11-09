@@ -1,0 +1,254 @@
+- type: tile
+  id: tile1
+  cells:
+  - position: {row: 0, column: 0}
+    terrain: Water
+  - position: {row: 0, column: 1}
+    terrain: Water
+  - position: {row: 0, column: 2}
+    terrain: Water
+  - position: {row: 0, column: 3}
+    terrain: Water
+  - position: {row: 0, column: 4}
+    terrain: Forest
+  - position: {row: 0, column: 5}
+    terrain: Forest
+  - position: {row: 1, column: 0}
+    terrain: Swamp
+  - position: {row: 1, column: 1}
+    terrain: Swamp
+  - position: {row: 1, column: 2}
+    terrain: Water
+  - position: {row: 1, column: 3}
+    terrain: Desert
+  - position: {row: 1, column: 4}
+    terrain: Forest
+  - position: {row: 1, column: 5}
+    terrain: Forest
+  - position: {row: 2, column: 0}
+    terrain: Swamp
+  - position: {row: 2, column: 1}
+    terrain: Swamp
+  - position: {row: 2, column: 2}
+    terrain: Desert
+  - position: {row: 2, column: 3}
+    terrain: Desert
+    animal: Bear
+  - position: {row: 2, column: 4}
+    terrain: Desert
+    animal: Bear
+  - position: {row: 2, column: 5}
+    terrain: Forest
+    animal: Bear
+
+- type: tile
+  id: tile2
+  cells:
+  - position: {row: 0, column: 0}
+    terrain: Swamp
+    animal: Cougar
+  - position: {row: 0, column: 1}
+    terrain: Forest
+    animal: Cougar
+  - position: {row: 0, column: 2}
+    terrain: Forest
+    animal: Cougar
+  - position: {row: 0, column: 3}
+    terrain: Forest
+  - position: {row: 0, column: 4}
+    terrain: Forest
+  - position: {row: 0, column: 5}
+    terrain: Forest
+  - position: {row: 1, column: 0}
+    terrain: Swamp
+  - position: {row: 1, column: 1}
+    terrain: Swamp
+  - position: {row: 1, column: 2}
+    terrain: Forest
+  - position: {row: 1, column: 3}
+    terrain: Desert
+  - position: {row: 1, column: 4}
+    terrain: Desert
+  - position: {row: 1, column: 5}
+    terrain: Desert
+  - position: {row: 2, column: 0}
+    terrain: Swamp
+  - position: {row: 2, column: 1}
+    terrain: Mountain
+  - position: {row: 2, column: 2}
+    terrain: Mountain
+  - position: {row: 2, column: 3}
+    terrain: Mountain
+  - position: {row: 2, column: 4}
+    terrain: Mountain
+  - position: {row: 2, column: 5}
+    terrain: Desert
+
+- type: tile
+  id: tile3
+  cells:
+  - position: {row: 0, column: 0}
+    terrain: Swamp
+  - position: {row: 0, column: 1}
+    terrain: Swamp
+  - position: {row: 0, column: 2}
+    terrain: Forest
+  - position: {row: 0, column: 3}
+    terrain: Forest
+  - position: {row: 0, column: 4}
+    terrain: Forest
+  - position: {row: 0, column: 5}
+    terrain: Water
+  - position: {row: 1, column: 0}
+    terrain: Swamp
+    animal: Cougar
+  - position: {row: 1, column: 1}
+    terrain: Swamp
+    animal: Cougar
+  - position: {row: 1, column: 2}
+    terrain: Forest
+  - position: {row: 1, column: 3}
+    terrain: Mountain
+  - position: {row: 1, column: 4}
+    terrain: Water
+  - position: {row: 1, column: 5}
+    terrain: Water
+  - position: {row: 2, column: 0}
+    terrain: Mountain
+    animal: Cougar
+  - position: {row: 2, column: 1}
+    terrain: Mountain
+  - position: {row: 2, column: 2}
+    terrain: Mountain
+  - position: {row: 2, column: 3}
+    terrain: Mountain
+  - position: {row: 2, column: 4}
+    terrain: Water
+  - position: {row: 2, column: 5}
+    terrain: Water
+
+- type: tile
+  id: tile4
+  cells:
+  - position: {row: 0, column: 0}
+    terrain: Desert
+  - position: {row: 0, column: 1}
+    terrain: Desert
+  - position: {row: 0, column: 2}
+    terrain: Mountain
+  - position: {row: 0, column: 3}
+    terrain: Mountain
+  - position: {row: 0, column: 4}
+    terrain: Mountain
+  - position: {row: 0, column: 5}
+    terrain: Mountain
+  - position: {row: 1, column: 0}
+    terrain: Desert
+  - position: {row: 1, column: 1}
+    terrain: Desert
+  - position: {row: 1, column: 2}
+    terrain: Mountain
+  - position: {row: 1, column: 3}
+    terrain: Water
+  - position: {row: 1, column: 4}
+    terrain: Water
+  - position: {row: 1, column: 5}
+    terrain: Water
+    animal: Cougar
+  - position: {row: 2, column: 0}
+    terrain: Desert
+  - position: {row: 2, column: 1}
+    terrain: Desert
+  - position: {row: 2, column: 2}
+    terrain: Desert
+  - position: {row: 2, column: 3}
+    terrain: Forest
+  - position: {row: 2, column: 4}
+    terrain: Forest
+  - position: {row: 2, column: 5}
+    terrain: Forest
+    animal: Cougar
+
+- type: tile
+  id: tile5
+  cells:
+  - position: {row: 0, column: 0}
+    terrain: Swamp
+  - position: {row: 0, column: 1}
+    terrain: Swamp
+  - position: {row: 0, column: 2}
+    terrain: Swamp
+  - position: {row: 0, column: 3}
+    terrain: Mountain
+  - position: {row: 0, column: 4}
+    terrain: Mountain
+  - position: {row: 0, column: 5}
+    terrain: Mountain
+  - position: {row: 1, column: 0}
+    terrain: Swamp
+  - position: {row: 1, column: 1}
+    terrain: Desert
+  - position: {row: 1, column: 2}
+    terrain: Desert
+  - position: {row: 1, column: 3}
+    terrain: Water
+  - position: {row: 1, column: 4}
+    terrain: Mountain
+  - position: {row: 1, column: 5}
+    terrain: Mountain
+    animal: Bear
+  - position: {row: 2, column: 0}
+    terrain: Desert
+  - position: {row: 2, column: 1}
+    terrain: Desert
+  - position: {row: 2, column: 2}
+    terrain: Water
+  - position: {row: 2, column: 3}
+    terrain: Water
+  - position: {row: 2, column: 4}
+    terrain: Water
+  - position: {row: 2, column: 5}
+    terrain: Water
+    animal: Bear
+
+- type: tile
+  id: tile6
+  cells:
+  - position: {row: 0, column: 0}
+    terrain: Desert
+    animal: Bear
+  - position: {row: 0, column: 1}
+    terrain: Desert
+  - position: {row: 0, column: 2}
+    terrain: Swamp
+  - position: {row: 0, column: 3}
+    terrain: Swamp
+  - position: {row: 0, column: 4}
+    terrain: Swamp
+  - position: {row: 0, column: 5}
+    terrain: Forest
+  - position: {row: 1, column: 0}
+    terrain: Mountain
+    animal: Bear
+  - position: {row: 1, column: 1}
+    terrain: Mountain
+  - position: {row: 1, column: 2}
+    terrain: Swamp
+  - position: {row: 1, column: 3}
+    terrain: Swamp
+  - position: {row: 1, column: 4}
+    terrain: Forest
+  - position: {row: 1, column: 5}
+    terrain: Forest
+  - position: {row: 2, column: 0}
+    terrain: Mountain
+  - position: {row: 2, column: 1}
+    terrain: Water
+  - position: {row: 2, column: 2}
+    terrain: Water
+  - position: {row: 2, column: 3}
+    terrain: Water
+  - position: {row: 2, column: 4}
+    terrain: Water
+  - position: {row: 2, column: 5}
+    terrain: Forest

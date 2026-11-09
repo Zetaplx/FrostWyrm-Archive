@@ -1,5 +1,7 @@
 # Development parity with FrostWyrm
 
+This documents the initial infrastructure port. Cryptid Companion has since been completed for one confirmed reference layout; see [current development and scope](cryptid-development.md).
+
 The implementation baseline is `Zetaplx/FrostWyrm` at commit [`ffa990b43176acc3dbbf423fee2289e8387a9aed`](https://github.com/Zetaplx/FrostWyrm/tree/ffa990b43176acc3dbbf423fee2289e8387a9aed) (`WIP tiles`). The port retains Archive's existing documentation, license, Core project path, and main test project path.
 
 ## Imported capabilities
@@ -27,6 +29,6 @@ Neither starting point implements entity/component storage, an ECS query engine,
 
 Prototype parent-data inheritance remains unfinished. Assignable CLR-type lookup is implemented, but is separate from merging YAML parent definitions. YAML support currently reads definitions; it does not write snapshots or provide round-trip serialization.
 
-CryptidCompanion contains one setup card, empty clue/clue-book resource placeholders, and unfinished board data types. Its setup flow demonstrates the infrastructure; full clue content, board assembly, and game behavior remain future work.
+The later Companion implementation supplies board assembly/rendering, all 23 Normal Mode clue rules, session state, questions/searches, penalties, persistence and offline support. Additional printed card/book catalogs remain content work. Cryptid domain rules remain in the application, separate from Archive.
 
 The runtime continues to use the source's singleton and reflection-based registration model. It does not yet provide multiple independent app instances. Native AOT and trimmed deployment compatibility have not been established.

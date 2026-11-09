@@ -1,31 +1,42 @@
-name: Archive Tests
+name: Archive and Companion Tests
 
 on:
   push:
-    branches:
-      - master
+    branches: [master, work]
   pull_request:
-    branches:
-      - master
+    branches: [master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/browser/package-lock.json
       - name: Restore
         run: dotnet restore FrostWyrm-Archive.slnx
-
       - name: Build
         run: dotnet build FrostWyrm-Archive.slnx --no-restore
-
-      - name: Test
-        run: dotnet test FrostWyrm-Archive.slnx --no-build --no-restore --verbosity normal
+      - name: Domain and Archive tests
+        run: dotnet test FrostWyrm-Archive.slnx --no-build --no-restore
+      - name: Publish PWA
+        run: dotnet publish apps/CryptidCompanion -c Release -o artifacts/cryptid
+      - name: Browser dependencies
+        run: |
+          npm ci --prefix tests/browser
+          npm exec --prefix tests/browser -- playwright install --with-deps chromium
+      - name: Full browser and offline workflow
+        env:
+          CRYPTID_BASE_URL: http://127.0.0.1:5011
+          CRYPTID_PUBLISHED: '1'
+        run: |
+          python3 scripts/serve.py artifacts/cryptid/wwwroot --port 5011 > /tmp/cryptid-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          npm test --prefix tests/browser

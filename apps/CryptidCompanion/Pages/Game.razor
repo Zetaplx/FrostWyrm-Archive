@@ -1,0 +1,59 @@
+@page "/game"
+@inject GameManager Session
+@inject ContentCatalog Catalog
+@inject BrowserSessionStore Storage
+<PageTitle>Field journal · Cryptid Companion</PageTitle>
+<p class="eyebrow">04 / THE EXPEDITION</p><h1>@(Session.Phase == SessionPhase.Won && Session.HasSession ? "You found the habitat." : "Follow your own hunch.")</h1>
+@if (!Session.HasSession)
+{ <p>No expedition is active.</p><a class="button" href="">Start at base camp</a> }
+else if (Session.Phase == SessionPhase.Opening)
+{ <p>Your opening cubes still need placing.</p><a class="button" href="opening">Finish opening information</a> }
+else
+{
+    <p class="lede">@Session.Card!.Name · @Session.PlayerCount clue-holders · You are @Session.HumanBook</p>
+    <div class="game-layout"><section class="panel map-panel"><BoardView Board="Session.Board!" Selected="SelectedPosition" SelectedChanged="Select" /><a href="setup">Review physical setup</a></section>
+    <section class="panel action-panel">
+        <details><summary>Your clue</summary><p>@Session.HumanClueText</p></details>
+        @if (Session.Phase == SessionPhase.Won)
+        { <div class="result success" role="status"><h2>Every clue agrees.</h2><p>The habitat is <strong>@Session.History.Last().Position</strong>. Your expedition is complete.</p><p>The other clues remain hidden.</p><a class="button" href="">Back to camp</a></div> }
+        else
+        {
+            <label for="space">Selected space</label><select id="space" @bind="_selected">
+                @foreach (var space in Session.Board!.Spaces) { <option value="@space.Position">@space.Position · @space.Terrain</option> }
+            </select>
+            <p class="field-note">@SelectedPosition · @Session.Board![SelectedPosition].Terrain · @(Session.HasCube(SelectedPosition) ? "Contains a cube — questions and searches are blocked." : "No cubes recorded here.")</p>
+            @if (Session.PendingHumanCubes > 0)
+            { <div class="notice"><strong>You owe a cube.</strong><p>Choose a space that fails your clue and has none of your pieces. Place your cube physically, then record it here.</p><button class="button full" @onclick="PlaceCube">Record my cube</button></div> }
+            else
+            {
+                <label for="opponent">Ask a clue-holder</label><select id="opponent" @bind="_book">@foreach (var book in Session.Opponents) { <option value="@book">@book · @(Catalog.Prototypes.Index<ClueBookPrototype>(book).Color)</option> }</select>
+                <button class="button full" @onclick="Ask">Ask about @_selected</button>
+                <div class="divider">OR</div><p class="field-note">Search only where your own clue allows. Responses proceed clockwise from you and stop at the first cube.</p>
+                <button class="button secondary full" @onclick="Search">Search @_selected</button>
+            }
+        }
+        @if (_error is not null) { <p role="alert" class="error">@_error</p> }
+    </section></div>
+    <section class="panel"><p class="eyebrow">PUBLIC INFORMATION ONLY</p><h2>The field journal</h2>
+        <p>Transfer every listed piece to the physical board, including cubes at other coordinates after a failed search. Clockwise order: @string.Join(" → ", Session.Books).</p>
+        @if (Session.History.Count == 0) { <p class="field-note">No questions yet. Select a space to make your first move.</p> }
+        <ol class="journal" aria-live="polite">@foreach (var turn in Session.History.Reverse())
+        { <li><strong>@turn.Number. @turn.Action · @turn.Position</strong><ul>@foreach (var marker in turn.Placements) { <li>@marker.Book: @(marker.Piece == Piece.Cube ? "■ CUBE / no" : "● DISC / yes") at @marker.Position <span class="field-note">(@marker.Reason)</span></li> }</ul></li> }</ol>
+        <details><summary>All recorded pieces, including opening cubes</summary><ul>@foreach (var marker in Session.Markers) { <li>@marker.Book · @marker.Piece · @marker.Position</li> }</ul></details>
+    </section>
+}
+@code {
+    private string _selected = "A1", _book = "";
+    private string? _error;
+    private Position SelectedPosition => Session.Board!.Spaces.First(s => s.Position.ToString() == _selected).Position;
+    protected override void OnInitialized() { _book = Session.Opponents.FirstOrDefault() ?? ""; }
+    private void Select(Position position) => _selected = position.ToString();
+    private Task Ask() => Act(() => Session.Ask(_book, SelectedPosition));
+    private Task Search() => Act(() => Session.Search(SelectedPosition));
+    private Task PlaceCube() => Act(() => Session.PlaceHumanCube(SelectedPosition));
+    private async Task Act(Action action)
+    {
+        try { action(); await Storage.Save(); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+}

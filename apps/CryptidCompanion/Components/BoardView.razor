@@ -1,0 +1,48 @@
+@using System.Globalization
+@using FrostWyrm.Math.Hex
+
+<div class="board-scroll">
+<svg class="board" viewBox="@ViewBox" role="group" aria-label="Reference hex board. Rows A to I, columns 1 to 12.">
+    @foreach (var space in Board.Spaces)
+    {
+        var p = Pixel(space);
+        <g class="hex-cell @(Selected == space.Position ? "selected" : "")" role="button" tabindex="0"
+           aria-label="@Label(space)" aria-pressed="@(Selected == space.Position ? "true" : "false")"
+           @onclick="() => SelectedChanged.InvokeAsync(space.Position)" @onkeydown="e => Key(e, space.Position)">
+            <title>@Label(space)</title>
+            <polygon points="@Points(p.X, p.Y)" class="terrain @space.Terrain.ToString().ToLowerInvariant()" />
+            <text x="@F(p.X)" y="@F(p.Y + 10)" class="coordinate">@space.Position</text>
+            @if (space.Animal != Animal.None)
+            { <g><text x="@F(p.X - 9)" y="@F(p.Y - 7)" class="feature">@(space.Animal == Animal.Bear ? "B" : "C")</text></g> }
+            @if (space.Structure is { } structure)
+            { <g><text x="@F(p.X + 9)" y="@F(p.Y - 7)" class="structure @structure.Color.ToString().ToLowerInvariant()">@(structure.Kind == StructureKind.Stone ? "⬟" : "▲")</text></g> }
+        </g>
+    }
+</svg>
+</div>
+<div class="board-legend"><span class="swatch forest">Forest</span><span class="swatch desert">Desert</span><span class="swatch water">Water</span><span class="swatch swamp">Swamp</span><span class="swatch mountain">Mountain</span><span>B = bear · C = cougar · ⬟ stone · ▲ shack</span></div>
+
+@code {
+    [Parameter, EditorRequired] public BoardState Board { get; set; } = default!;
+    [Parameter] public Position? Selected { get; set; }
+    [Parameter] public EventCallback<Position> SelectedChanged { get; set; }
+    private const double Radius = 24;
+    private (double X, double Y) Pixel(BoardSpace space) => HexCoordinates.ToPixel(space.Hex, Board.Definition.Orientation, Radius);
+    private string ViewBox
+    {
+        get
+        {
+            var pixels = Board.Spaces.Select(Pixel).ToArray();
+            return $"{F(pixels.Min(p => p.X) - 28)} {F(pixels.Min(p => p.Y) - 28)} {F(pixels.Max(p => p.X) - pixels.Min(p => p.X) + 56)} {F(pixels.Max(p => p.Y) - pixels.Min(p => p.Y) + 56)}";
+        }
+    }
+    private string Points(double x, double y) => string.Join(" ", Enumerable.Range(0, 6).Select(i =>
+    {
+        var angle = (i * 60 + (Board.Definition.Orientation == Hex.Orientation.PointTop ? 30 : 0)) * System.Math.PI / 180;
+        return $"{F(x + Radius * System.Math.Cos(angle))},{F(y + Radius * System.Math.Sin(angle))}";
+    }));
+    private static string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private static string Label(BoardSpace s) => $"{s.Position}, {s.Terrain}" + (s.Animal == Animal.None ? "" : $", {s.Animal} territory") +
+        (s.Structure is null ? "" : $", {s.Structure.Color} {s.Structure.Kind}");
+    private Task Key(KeyboardEventArgs e, Position position) => e.Key is "Enter" or " " ? SelectedChanged.InvokeAsync(position) : Task.CompletedTask;
+}
