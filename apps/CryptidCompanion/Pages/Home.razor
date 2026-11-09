@@ -1,0 +1,69 @@
+﻿@page "/"
+@inject GameManager GameManager
+@inject NavigationManager Navigation
+
+<PageTitle>Cryptid Digital Companion</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <h1 class="text-center mb-4">
+                Cryptid Digital Companion
+            </h1>
+
+            <div class="mb-3">
+                <label for="cardNumber" class="form-label">
+                    Card Number
+                </label>
+
+                <InputNumber id="cardNumber"
+                             class="form-control"
+                             @bind-Value="_cardNumber" />
+            </div>
+
+            <div class="mb-4">
+                <label for="playerCount" class="form-label">
+                    Player Count
+                </label>
+
+                <InputSelect id="playerCount"
+                             class="form-select"
+                             @bind-Value="_playerCount">
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
+                    <option value="5">5 Players</option>
+                </InputSelect>
+            </div>
+
+            <button class="btn btn-primary w-100"
+                    @onclick="StartGame">
+                Start Game
+            </button>
+
+            @if (_error is not null)
+            {
+                <p class="text-danger mt-3" role="alert">@_error</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code
+{
+    private int _cardNumber = 4;
+    private int _playerCount = 3;
+    private string? _error;
+
+    private void StartGame()
+    {
+        try
+        {
+            GameManager.SetupStart(_cardNumber, _playerCount);
+            Navigation.NavigateTo("/setup");
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+        {
+            _error = exception.Message;
+        }
+    }
+}

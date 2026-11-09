@@ -1,0 +1,23 @@
+@page "/setup"
+@inject GameManager GameManager
+
+<PageTitle>Game Setup</PageTitle>
+@if (GameManager.CurrentSetup is { } setup)
+{
+    <h1>Game Setup: Card @GameManager.CardNumber</h1>
+    <p>@GameManager.PlayerCount players</p>
+    <p>Clue references from the setup card:</p>
+    <ul>
+        @foreach (var (book, clue) in setup.Clues)
+        {
+            <li>@book: @clue</li>
+        }
+    </ul>
+}
+else
+{
+    <h1>Game Setup</h1>
+    <p>Choose a card and player count first.</p>
+}
+
+<a href="">Back to card selection</a>

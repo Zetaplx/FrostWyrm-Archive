@@ -15,6 +15,15 @@
 - [ ] ComponentManager
 - [ ] ComponentStore<T>
 
+### Supporting infrastructure
+- [x] Dependency registration, resolution, and injection
+- [x] YAML data definitions and custom deserializers
+- [x] Prototype registration, loading, and typed lookup
+- [x] Blazor service-registration bridge
+- [x] Hex coordinates and grid storage
+- [x] Core and integration tests with GitHub Actions
+- [ ] Prototype parent-data inheritance
+
 ### Runtime
 - [ ] App
 - [ ] EntitySystem
@@ -33,5 +42,7 @@
 - [ ] YAML snapshot support
 
 ### Example
+- [x] Blazor Module
+- [x] CryptidCompanion setup-card demonstration
 - [ ] CLI Module
 - [ ] Notes example

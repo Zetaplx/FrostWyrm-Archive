@@ -1,8 +1,14 @@
 <Solution>
+  <Folder Name="/apps/">
+    <Project Path="apps/CryptidCompanion/CryptidCompanion.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/FrostWyrm.Archive.Core/FrostWyrm.Archive.Core.csproj" />
+    <Project Path="src/FrostWyrm.Blazor/FrostWyrm.Blazor.csproj" />
+    <Project Path="src/FrostWyrm.Math/FrostWyrm.Math.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FrostWyrm.Archive.Test/FrostWyrm.Archive.Test.csproj" />
+    <Project Path="tests/FrostWyrm.Integration.Tests/FrostWyrm.Integration.Tests.csproj" />
   </Folder>
 </Solution>

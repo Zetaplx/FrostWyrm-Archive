@@ -1,0 +1,21 @@
+- type: setupCard
+  id: 4
+  setups:
+  - playerCount: 3
+    clues:
+      Alpha: 4
+      Beta: 52
+      Gamma: 13
+  - playerCount: 4
+    clues:
+      Alpha: 16
+      Gamma: 33
+      Delta: 1
+      Epsilon: 62
+  - playerCount: 5
+    clues:
+      Alpha: 85
+      Beta: 13
+      Gamma: 15
+      Delta: 3
+      Epsilon: 55
