@@ -366,15 +366,8 @@ pre {
     cursor:pointer;
     outline:none
 }
-.hex-cell:hover polygon,.hex-cell:focus polygon {
-    stroke:#193b31;
-    stroke-width:2.5
-}
-.hex-cell.selected polygon {
-    stroke:#fff;
-    stroke-width:4;
-    filter:drop-shadow(0 0 2px #112f27)
-}
+
+
 .coordinate {
     text-anchor:middle;
     fill:#102e27;
@@ -636,3 +629,40 @@ h1:focus {
 .interaction-overlay polygon { fill: none; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .interaction-overlay .selection-halo { stroke-width: 5; }
 .interaction-overlay .selection-outline { stroke: #fffef8; stroke-width: 2; }
+
+/* Public board information: readable symbols, reserved label space, interactive legends. */
+.book-orange, .player-orange { color: #8a5900; }
+.coordinate { font-size: 7px; }
+.board-toolbar { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; margin-bottom: .5rem; flex-wrap: wrap; font-size: .8rem; }
+.animal-border { fill: none; stroke: #14221c; stroke-width: 1.4; pointer-events: none; }
+.animal-cougar { stroke: #ba272a; stroke-dasharray: 3 2; }
+.structure-shape { stroke: #15342a; stroke-width: 1; }
+.legend-muted { opacity: .22; }
+.legend-overlay { color: #163c30; pointer-events: none; }
+.legend-overlay polygon { fill: none; stroke: currentColor; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.legend-help { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-size: .72rem; color: var(--muted); }
+.legend-group { margin-top: .8rem; }
+.legend-heading { display: block; color: var(--muted); font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.legend-group .board-legend { margin-top: .3rem; gap: .4rem; }
+.legend-item { display: inline-flex; gap: .3rem; align-items: center; background: transparent; border: 1px solid transparent; border-radius: 3px; padding: .25rem .35rem; color: var(--ink); font-size: .75rem; }
+.legend-item:hover, .legend-item:focus-visible, .legend-item[aria-pressed=true] { border-color: #81927b; background: #eef2e7; }
+.legend-item.book-red { color: #bd302e; }
+.legend-item.book-green { color: #247549; }
+.legend-item.book-blue { color: #285bd2; }
+.legend-item.book-orange { color: #8a5900; }
+.legend-item.book-black { color: #202522; }
+.legend-item .book-dot { margin-right: 0; }
+.structure-key-blue { color: #284ad4; }
+.structure-key-green { color: #148238; }
+.structure-key-white .book-dot { background: #fff; border: 1px solid #334639; }
+.animal-key { width: 1.15rem; height: 1.15rem; overflow: visible; }
+.piece-key { margin-bottom: 0; }
+.past-games .data-list li { align-items: center; }
+.past-games .field-note { margin: .4rem 0 0; }
+.site-header nav { flex-wrap: wrap; }
+@media(max-width:750px) { .board-toolbar { gap: .4rem; } .legend-item { min-height: 36px; } .past-games .data-list li { align-items: flex-start; gap: .8rem; } }
+.legend-overlay.book-red { color: #bd302e; }
+.legend-overlay.book-green { color: #247549; }
+.legend-overlay.book-blue { color: #285bd2; }
+.legend-overlay.book-orange { color: #8a5900; }
+.legend-overlay.book-black { color: #202522; }

@@ -12,7 +12,7 @@
     </div>
     <div class="hero-art" aria-hidden="true"><div class="contour c1"></div><div class="contour c2"></div><div class="contour c3"></div><div class="compass">✧</div><small>THE HABITAT IS OUT THERE.</small></div>
 </section>
-@if (Game.HasSession)
+@if (Game.HasSession && Game.Phase != SessionPhase.Won)
 {
     <section class="panel active-game"><div><p class="eyebrow">YOUR FIELD JOURNAL IS OPEN</p><h2>@Game.Card!.Name</h2><p>@Game.PlayerCount clue-holders · You are @Game.HumanBook · @Game.History.Count actions recorded</p></div>
         <a class="button" href="@(Game.Phase == SessionPhase.Opening ? "opening" : "game")">Resume expedition →</a>
@@ -30,7 +30,7 @@ else
         <label for="players">Clue-holders, including you</label><select id="players" @bind="State.DraftPlayers">
             @foreach (var setup in SelectedCard?.Setups ?? new()) { <option value="@setup.PlayerCount">@setup.PlayerCount players</option> }
         </select>
-        <button class="button full" @onclick="Prepare" disabled="@(SelectedCard is null)">Prepare the board →</button>
+        <button class="button full" @onclick="Prepare" disabled="@(SelectedCard is null || !_campReady)">Prepare the board →</button>
     </div><div class="panel muted-panel"><p class="eyebrow">HOW IT WORKS</p><h2>Hidden information.<br />Human intuition.</h2>
         <ol class="steps"><li>Build the reference board with your physical tiles.</li><li>Choose your color. The card assigns your clue.</li><li>Transfer opening cubes to the board.</li><li>Ask questions and search. Find the one shared habitat.</li></ol>
         <p>No automated opponents. No suggested moves. Just honest answers to the questions you choose.</p>
@@ -42,14 +42,28 @@ else
         @if (_importMessage is not null) { <pre role="status">@_importMessage</pre> }
     </details>
 }
+@if (State.PastGames.Count > 0)
+{
+    <section class="panel past-games"><p class="eyebrow">COMPLETED EXPEDITIONS</p><h2>Past games</h2>
+        <ul class="data-list">
+            @foreach (var completed in State.PastGames.OrderByDescending(g => g.CompletedAt))
+            {
+                <li><div><strong>@completed.Name</strong><p class="field-note">@completed.Players clue-holders · @completed.Human · @completed.CompletedAt.ToLocalTime().ToString("g")</p></div>
+                    <a class="button secondary" href="review/@completed.Id">Review</a></li>
+            }
+        </ul>
+    </section>
+}
 @code {
-    private bool _confirm;
+    private bool _confirm, _campReady;
     private string? _importMessage;
     private SetupCardPrototype? SelectedCard => Catalog.Cards.FirstOrDefault(c => c.ID == State.DraftCard);
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await Storage.FinishCompletedGame();
         if (SelectedCard is null && Catalog.Cards.Count > 0) State.DraftCard = Catalog.Cards[0].ID;
         UpdatePlayers();
+        _campReady = true;
     }
     private void Prepare() => Navigation.NavigateTo("setup");
     private void UpdatePlayers()

@@ -78,6 +78,26 @@ for(const count of [3,4,5])test(`${count} clue-holders: opening, question, penal
   await expect(page.locator('.interaction-overlay')).toBeVisible();
   await pieceToggle.uncheck();
   await expect(page.locator('.board-piece')).toHaveCount(0);
+  for(const [name,expected] of [
+    ['Highlight Forest terrain',cells.filter(c=>c.terrain==='Forest').map(c=>c.label)],
+    ['Highlight Bear territory',cells.filter(c=>c.animal==='Bear').map(c=>c.label)],
+    ['Highlight Blue structures',cells.filter(c=>c.structure?.color==='Blue').map(c=>c.label)],
+    ['Highlight Alpha pieces',save.Markers.filter(m=>m.Book==='Alpha').map(m=>String.fromCharCode(65+m.Position.Row)+(m.Position.Column+1))]
+  ]) {
+    await page.getByRole('button',{name,exact:true}).hover();
+    await expect.poll(()=>page.locator('.hex-cell.legend-match').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label').split(',')[0]).sort())).toEqual([...new Set(expected)].sort());
+  }
+  await expect(page.getByRole('button',{name:'Highlight Alpha pieces'})).toHaveText('Alpha');
+  await page.getByRole('button',{name:'Highlight Alpha pieces'}).click();
+  await page.getByRole('heading',{name:'Follow your own hunch.'}).hover();
+  await expect(page.getByRole('button',{name:'Highlight Alpha pieces'})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'Clear highlighting'}).click();
+  await expect(page.locator('.legend-match')).toHaveCount(0);
+  await page.getByRole('button',{name:'Highlight Beta pieces'}).focus();
+  await expect(page.locator('.legend-match')).toHaveCount(2);
+  await page.getByRole('button',{name:'Clear highlighting'}).click();
+  await expect(page.locator('.animal-bear').first()).toHaveCSS('stroke-dasharray','none');
+  await expect(page.locator('.animal-cougar').first()).not.toHaveCSS('stroke-dasharray','none');
   const opponents=Object.keys(save.Assignments).filter(b=>b!==save.Human);
   const target=opponents[0];
   const negative=cells.find(c=>!cubed(save,c)&&!matches(save.Assignments[target],c));
@@ -108,6 +128,16 @@ for(const count of [3,4,5])test(`${count} clue-holders: opening, question, penal
   await page.getByRole('button',{name:`Search ${solution[0].label}`,exact:true}).click();
   await expect(page.getByRole('heading',{name:'You found the habitat.'})).toBeVisible();
   await expect(page.getByText('The other clues remain hidden.')).toBeVisible();
+  await pieceToggle.check();
+  const habitat = page.getByRole('button',{name:new RegExp('^'+solution[0].label+',')});
+  await expect(habitat.locator('.board-piece circle')).toHaveCount(count);
+  const cubeWidth=Number(await page.locator('.board-piece rect').first().getAttribute('width'));
+  const discDiameter=2*Number(await habitat.locator('.board-piece circle').first().getAttribute('r'));
+  expect(discDiameter).toBeGreaterThan(cubeWidth*1.5);
+  expect(await habitat.evaluate(cell=>{
+    const label=cell.querySelector('.coordinate').getBBox();
+    return [...cell.querySelectorAll('.board-piece')].every(piece=>{const b=piece.getBBox();return b.y+b.height<label.y;});
+  })).toBe(true);
   expect(errors).toEqual([]);
 });
 
@@ -135,4 +165,53 @@ test('published PWA resumes a game with the network offline',async({page,context
   await expect(page.getByRole('heading',{name:'Follow your own hunch.'})).toBeVisible({timeout:60000});
   expect(await saved(page)).toEqual(save);
   await context.setOffline(false);
+});
+
+
+test('display settings persist across pages and reloads',async({page})=>{
+  await start(page,5);
+  const before=await saved(page);
+  await page.getByRole('link',{name:'Settings',exact:true}).click();
+  await page.getByRole('checkbox',{name:'Show coordinate labels'}).uncheck();
+  await page.getByRole('checkbox',{name:'Show recorded cubes and discs'}).check();
+  await page.getByRole('link',{name:'Return to game',exact:true}).click();
+  await expect(page.locator('.coordinate')).toHaveCount(0);
+  await expect(page.locator('.board-piece')).toHaveCount(10);
+  await page.reload();
+  await expect(page.getByRole('heading',{name:'Follow your own hunch.'})).toBeVisible({timeout:60000});
+  await expect(page.locator('.coordinate')).toHaveCount(0);
+  await expect(page.locator('.board-piece')).toHaveCount(10);
+  expect(await saved(page)).toEqual(before);
+});
+
+test('completed games move to review history without disturbing a new expedition',async({page})=>{
+  await start(page);
+  const save=await saved(page);
+  const solution=cells.find(c=>Object.values(save.Assignments).every(id=>matches(id,c)));
+  await page.getByLabel('Selected space').selectOption(solution.label);
+  await page.getByRole('button',{name:`Search ${solution.label}`,exact:true}).click();
+  await expect(page.getByRole('heading',{name:'You found the habitat.'})).toBeVisible();
+  // Migrate a winning save from the previous release, which had no session ID or archive.
+  await page.evaluate(()=>{
+    const legacy=JSON.parse(localStorage.getItem('cryptid-session-v1'));
+    delete legacy.SessionId;
+    localStorage.setItem('cryptid-session-v1',JSON.stringify(legacy));
+    localStorage.removeItem('cryptid-history-v1');
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'Past games',exact:true})).toBeVisible({timeout:60000});
+  await expect(page.getByRole('link',{name:/Resume expedition/})).toHaveCount(0);
+  const review=await page.getByRole('link',{name:'Review',exact:true}).getAttribute('href');
+  await page.reload();
+  await expect(page.getByRole('link',{name:'Review',exact:true})).toHaveCount(1,{timeout:60000});
+  await start(page);
+  const active=await saved(page);
+  expect(active.SessionId).not.toBe(save.SessionId);
+  await page.goto('/'+review);
+  await expect(page.getByRole('heading',{name:'Back through the field notes.'})).toBeVisible({timeout:60000});
+  await expect(page.getByRole('button',{name:/^Search /})).toHaveCount(0);
+  expect(await saved(page)).toEqual(active);
+  await page.getByRole('link',{name:'Back to camp',exact:true}).click();
+  await expect(page.getByRole('link',{name:/Resume expedition/})).toBeVisible();
+  await expect(page.getByRole('link',{name:'Review',exact:true})).toHaveCount(1);
 });

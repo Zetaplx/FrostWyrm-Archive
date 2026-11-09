@@ -1,0 +1,31 @@
+@page "/review/{Id:guid}"
+@inject BrowserSessionStore Storage
+<PageTitle>Review expedition · Cryptid Companion</PageTitle>
+<p class="eyebrow">COMPLETED EXPEDITION / REVIEW</p><h1>Back through the field notes.</h1>
+@if (_error is not null)
+{ <p class="error" role="alert">@_error</p> }
+else if (_game is not null)
+{
+    <p class="lede">@_game.Card!.Name · @_game.PlayerCount clue-holders · You played @_game.HumanBook</p>
+    <section class="panel"><h2>Habitat: @_game.History.Last().Position</h2><p>This completed journal is read-only. Reviewing it leaves any current expedition untouched.</p>
+        <BoardView Board="_game.Board!" Content="_catalog" Markers="_game.Markers" Selected="_selected" SelectedChanged="Select" />
+    </section>
+    <section class="panel"><h2>The field journal</h2><ol class="journal" reversed>
+        @foreach (var turn in _game.History.Reverse())
+        { <li value="@turn.Number"><strong>@turn.Action · @turn.Position</strong><ul>@foreach (var marker in turn.Placements) { <li>@marker.Book · @marker.Piece at @marker.Position (@marker.Reason)</li> }</ul></li> }
+    </ol><details><summary>All recorded pieces</summary><ul>@foreach (var marker in _game.Markers) { <li>@marker.Book · @marker.Piece · @marker.Position</li> }</ul></details></section>
+}
+<a class="button" href="">Back to camp</a>
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private GameManager? _game;
+    private ContentCatalog? _catalog;
+    private Position? _selected;
+    private string? _error;
+    protected override void OnParametersSet()
+    {
+        try { (_game, _catalog) = Storage.Review(Id); _selected = _game.History.Last().Position; _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+    private void Select(Position position) => _selected = position;
+}

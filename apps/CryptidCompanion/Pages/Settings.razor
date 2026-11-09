@@ -1,0 +1,12 @@
+@page "/settings"
+@inject CompanionState State
+@inject BrowserSessionStore Storage
+<PageTitle>Display settings · Cryptid Companion</PageTitle>
+<p class="eyebrow">MAKE THE MAP YOURS</p><h1>Display settings</h1>
+<section class="panel narrow"><p>These preferences apply to every board and stay saved on this browser.</p>
+    <label class="piece-toggle"><input type="checkbox" @bind="State.Display.ShowPieces" @bind:after="Storage.SavePreferences" /> Show recorded cubes and discs</label>
+    <label class="piece-toggle"><input type="checkbox" @bind="State.Display.ShowCoordinates" @bind:after="Storage.SavePreferences" /> Show coordinate labels</label>
+    <p class="field-note">Discs are larger than cubes. Coordinates have their own area at the bottom of each hex, clear of pieces and structures.</p>
+    <h2>Legend highlighting</h2><p>Hover or focus a legend item to highlight matching spaces. Tap or click to pin a highlight; use Clear highlighting to remove it. Player highlights show only their recorded cubes and discs.</p>
+    <a class="button" href="game">Return to game</a> <a href="">Back to camp</a>
+</section>

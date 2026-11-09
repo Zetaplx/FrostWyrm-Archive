@@ -18,6 +18,7 @@ public sealed class GameManager : IManager
     private readonly List<Marker> _markers = new();
     private readonly List<TurnRecord> _history = new();
     private GameRandom _random = new(0);
+    public Guid SessionId { get; private set; }
     public SetupCardPrototype? Card { get; private set; }
     public BoardState? Board { get; private set; }
     public string HumanBook { get; private set; } = "";
@@ -41,6 +42,7 @@ public sealed class GameManager : IManager
         if (!setup.Books.Any(b => b.ID == human)) throw new InvalidOperationException("Choose a color used by this setup.");
         var assignments = CardClues.Resolve(setup, board, _catalog.Prototypes);
         var random = new GameRandom(seed ?? RandomNumberGenerator.GetInt32(int.MaxValue));
+        SessionId = Guid.NewGuid();
         Card = card; CurrentSetup = setup; Board = board; PlayerCount = players;
         CardNumber = int.TryParse(card.ID, out var number) ? number : 0;
         HumanBook = human; _assignments = assignments; _random = random;
@@ -144,7 +146,7 @@ public sealed class GameManager : IManager
 
     public string Export() => JsonSerializer.Serialize(new SessionSave
     {
-        Catalog = _catalog.Fingerprint, Card = Card!.ID, Players = PlayerCount, Human = HumanBook,
+        SessionId = SessionId, Catalog = _catalog.Fingerprint, Card = Card!.ID, Players = PlayerCount, Human = HumanBook,
         Seed = _random.Seed, Draws = _random.Draws, Assignments = _assignments, Markers = _markers,
         History = _history, Phase = Phase, PendingHumanCubes = PendingHumanCubes
     });
@@ -167,6 +169,7 @@ public sealed class GameManager : IManager
             if (!save.Assignments.TryGetValue(marker.Book, out var clue) || !Enum.IsDefined(marker.Piece) ||
                 ClueEvaluator.Matches(_catalog.Prototypes.Index<CluePrototype>(clue), board, marker.Position) != (marker.Piece == Piece.Disc))
                 throw new InvalidOperationException("Saved pieces contradict their clues.");
+        SessionId = save.SessionId == Guid.Empty ? Guid.NewGuid() : save.SessionId;
         Card = card; CurrentSetup = setup; Board = board; HumanBook = save.Human; PlayerCount = save.Players;
         _assignments = save.Assignments; _random = new(save.Seed, save.Draws);
         _markers.Clear(); _markers.AddRange(save.Markers); _history.Clear(); _history.AddRange(save.History);
@@ -175,6 +178,7 @@ public sealed class GameManager : IManager
 
     public void Clear()
     {
+        SessionId = Guid.Empty;
         Card = null; Board = null; CurrentSetup = null; HumanBook = "";
         _markers.Clear(); _history.Clear(); _assignments.Clear(); PendingHumanCubes = 0;
     }

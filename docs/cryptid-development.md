@@ -27,7 +27,7 @@ npm test --prefix tests/browser
 
 The suite starts a development server on port 5010 unless one is already running. Set `CHROMIUM_EXECUTABLE_PATH` to use a system Chromium installation. On this cloud machine, also use `npm --cache /workspace/.npm` (or export `npm_config_cache=/workspace/.npm`) because the home directory is read-only.
 
-Browser tests play complete 3-, 4- and 5-clue-holder games, test question/search penalties and wins, verify simulated clues are absent from the UI, check reload continuity, check a phone viewport, and exercise malformed saves/imports. The offline case is explicitly skipped against development assets, which intentionally use a pass-through worker.
+Browser tests play complete 3-, 4- and 5-clue-holder games, test question/search penalties and wins, verify simulated clues are absent from the UI, check reload continuity, check a phone viewport, and exercise malformed saves/imports. They also check public legend filters (hover, keyboard focus and pinning), saved display preferences, larger discs, clear label placement, completed-game history, and read-only review without altering an active expedition. The offline case is explicitly skipped against development assets, which intentionally use a pass-through worker.
 
 ## Production / offline validation
 

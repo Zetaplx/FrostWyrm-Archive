@@ -168,7 +168,11 @@ public sealed class CompanionDomainTests
     {
         var (catalog, game, save) = Start();
         var duplicate = Game(catalog); duplicate.Begin(save.Card, save.Players, save.Human, save.Seed);
-        Assert.Equal(game.Export(), duplicate.Export());
+        var second = JsonSerializer.Deserialize<SessionSave>(duplicate.Export())!;
+        Assert.NotEqual(save.SessionId, second.SessionId);
+        Assert.Equal(save.Markers, second.Markers);
+        Assert.Equal(save.Assignments, second.Assignments);
+        Assert.Equal(save.Draws, second.Draws);
         PayCubes(catalog, game, save); game.StartPlay();
         var restored = Game(catalog); restored.Restore(game.Export());
         Assert.Equal(game.Export(), restored.Export());

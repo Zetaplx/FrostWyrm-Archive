@@ -1,83 +1,150 @@
 @using System.Globalization
 @using FrostWyrm.Math.Hex
 @inject ContentCatalog Catalog
+@inject CompanionState State
+@inject BrowserSessionStore Storage
 
-@if (Markers.Count > 0)
-{
-    <label class="piece-toggle"><input type="checkbox" @bind="_showPieces" /> Show recorded cubes and discs</label>
-}
+<div class="board-toolbar">
+    @if (Markers.Count > 0)
+    { <label class="piece-toggle"><input type="checkbox" @bind="State.Display.ShowPieces" @bind:after="Storage.SavePreferences" /> Show recorded cubes and discs</label> }
+    <a href="settings">Display settings</a>
+</div>
 <div class="board-scroll">
 <svg class="board" viewBox="@ViewBox" role="group" aria-label="Reference hex board. Rows A to I, columns 1 to 12.">
     @foreach (var space in Board.Spaces)
     {
         var p = Pixel(space);
-        <g class="hex-cell @(Selected == space.Position ? "selected" : "")" role="button" tabindex="0"
+        <g class="hex-cell @(Selected == space.Position ? "selected" : "") @(ActiveFilter is null ? "" : MatchesFilter(space) ? "legend-match" : "legend-muted")" role="button" tabindex="0"
            aria-label="@Label(space)" aria-pressed="@(Selected == space.Position ? "true" : "false")"
            @onclick="() => SelectedChanged.InvokeAsync(space.Position)" @onkeydown="e => Key(e, space.Position)"
            @onmouseenter="() => _hovered = space.Position" @onmouseleave="() => _hovered = null"
            @onfocus="() => _focused = space.Position" @onblur="() => _focused = null">
             <title>@Label(space)</title>
             <polygon points="@Points(p.X, p.Y)" class="terrain @space.Terrain.ToString().ToLowerInvariant()" />
-            <text x="@F(p.X)" y="@F(p.Y + 10)" class="coordinate">@space.Position</text>
             @if (space.Animal != Animal.None)
-            { <g><text x="@F(p.X - 9)" y="@F(p.Y - 7)" class="feature">@(space.Animal == Animal.Bear ? "B" : "C")</text></g> }
+            { <polygon class="animal-border animal-@space.Animal.ToString().ToLowerInvariant()" points="@Points(p.X, p.Y, 21)" aria-hidden="true" /> }
             @if (space.Structure is { } structure)
-            { <g><text x="@F(p.X + 9)" y="@F(p.Y - 7)" class="structure @structure.Color.ToString().ToLowerInvariant()">@(structure.Kind == StructureKind.Stone ? "⬟" : "▲")</text></g> }
-            @if (_showPieces)
+            {
+                <g class="structure @structure.Color.ToString().ToLowerInvariant()" aria-hidden="true">
+                    @if (structure.Kind == StructureKind.Stone)
+                    { <polygon class="structure-shape" points="@Points(p.X, p.Y - 12, 5)" /> }
+                    else
+                    { <polygon class="structure-shape" points="@($"{F(p.X)},{F(p.Y - 17)} {F(p.X - 5)},{F(p.Y - 8)} {F(p.X + 5)},{F(p.Y - 8)}")" /> }
+                </g>
+            }
+            @if (State.Display.ShowPieces)
             {
                 var pieces = Markers.Where(m => m.Position == space.Position).ToArray();
                 @for (var i = 0; i < pieces.Length; i++)
                 {
                     var marker = pieces[i];
-                    var x = p.X + (i - (pieces.Length - 1) / 2.0) * 7.5;
-                    <g class="board-piece book-@ColorFor(marker.Book)" role="img" aria-label="@($"{marker.Book} {ColorFor(marker.Book)} {marker.Piece} at {marker.Position}")">
-                        <title>@marker.Book · @ColorFor(marker.Book) · @marker.Piece · @marker.Position</title>
+                    var slot = PieceSlot(i, pieces.Length);
+                    var x = p.X + slot.X;
+                    var y = p.Y + slot.Y;
+                    <g class="board-piece book-@ColorFor(marker.Book)" role="img" aria-label="@($"{marker.Book} {marker.Piece} at {marker.Position}")">
+                        <title>@marker.Book · @marker.Piece · @marker.Position</title>
                         @if (marker.Piece == Piece.Cube)
-                        { <rect class="piece-shape" x="@F(x - 3.1)" y="@F(p.Y - 3.1)" width="6.2" height="6.2" /> }
+                        { <rect class="piece-shape" x="@F(x - 2.3)" y="@F(y - 2.3)" width="4.6" height="4.6" /> }
                         else
-                        { <circle class="piece-shape" cx="@F(x)" cy="@F(p.Y)" r="3.2" /> }
+                        { <circle class="piece-shape" cx="@F(x)" cy="@F(y)" r="4.2" /> }
                     </g>
                 }
             }
+            @if (State.Display.ShowCoordinates)
+            { <g><text x="@F(p.X)" y="@F(p.Y + 18)" class="coordinate">@space.Position</text></g> }
         </g>
     }
-    @* Paint interaction outlines after all cells so neighbors cannot cover any edge. *@
+    @if (ActiveFilter is not null)
+    {
+        <g class="legend-overlay @FilterColor" aria-hidden="true">
+            @foreach (var space in Board.Spaces.Where(MatchesFilter))
+            { var p = Pixel(space); <polygon points="@Points(p.X, p.Y, 22)" /> }
+        </g>
+    }
     @if ((_hovered ?? _focused) is { } interaction && interaction != Selected)
     {
         var p = Pixel(Board[interaction]);
-        <g class="interaction-overlay" aria-hidden="true">
-            <polygon class="selection-halo" points="@Points(p.X, p.Y)" />
-            <polygon class="selection-outline" points="@Points(p.X, p.Y)" />
-        </g>
+        <g class="interaction-overlay" aria-hidden="true"><polygon class="selection-halo" points="@Points(p.X, p.Y)" /><polygon class="selection-outline" points="@Points(p.X, p.Y)" /></g>
     }
     @if (Selected is { } selected)
     {
         var p = Pixel(Board[selected]);
-        <g class="selection-overlay" aria-hidden="true">
-            <polygon class="selection-halo" points="@Points(p.X, p.Y)" />
-            <polygon class="selection-outline" points="@Points(p.X, p.Y)" />
-        </g>
+        <g class="selection-overlay" aria-hidden="true"><polygon class="selection-halo" points="@Points(p.X, p.Y)" /><polygon class="selection-outline" points="@Points(p.X, p.Y)" /></g>
     }
 </svg>
 </div>
-<div class="board-legend"><span class="swatch forest">Forest</span><span class="swatch desert">Desert</span><span class="swatch water">Water</span><span class="swatch swamp">Swamp</span><span class="swatch mountain">Mountain</span><span>B = bear · C = cougar · ⬟ stone · ▲ shack</span></div>
-@if (_showPieces)
+<div class="legend-help"><span>Hover or focus to highlight. Click or tap to pin.</span>
+    <button class="quiet" style="visibility: @(ActiveFilter is null ? "hidden" : "visible")" disabled="@(ActiveFilter is null)" @onclick="ClearFilter">Clear highlighting</button>
+</div>
+@foreach (var group in Legend.GroupBy(e => e.Group))
 {
-    <div class="board-legend piece-legend"><span>■ cube / no · ● disc / yes</span>
-        @foreach (var book in Markers.Select(m => m.Book).Distinct())
-        { <span class="book-@ColorFor(book)"><span class="book-dot" aria-hidden="true"></span>@book · @ColorFor(book)</span> }
-    </div>
+    <div class="legend-group"><span class="legend-heading">@group.Key</span><div class="board-legend">
+        @foreach (var entry in group)
+        {
+            <button class="legend-item @entry.Css" aria-label="@entry.AccessibleLabel" aria-pressed="@(_pinnedFilter == entry.Key ? "true" : "false")"
+                    @onmouseenter="() => _previewFilter = entry.Key" @onmouseleave="() => _previewFilter = null"
+                    @onfocus="() => _focusFilter = entry.Key" @onblur="() => _focusFilter = null"
+                    @onclick="() => _pinnedFilter = _pinnedFilter == entry.Key ? null : entry.Key">
+                @if (entry.Key.StartsWith("animal:"))
+                { <svg class="animal-key" viewBox="0 0 24 24" aria-hidden="true"><polygon class="animal-border animal-@entry.Value.ToLowerInvariant()" points="22,12 17,21 7,21 2,12 7,3 17,3" /></svg> }
+                else if (entry.Key.StartsWith("kind:"))
+                { <span aria-hidden="true">@(entry.Value == "Stone" ? "⬟" : "▲")</span> }
+                else if (entry.Key.StartsWith("book:") || entry.Key.StartsWith("color:"))
+                { <span class="book-dot" aria-hidden="true"></span> }
+                <span>@entry.Label</span>
+            </button>
+        }
+    </div></div>
 }
+@if (Markers.Count > 0) { <p class="field-note piece-key">■ smaller cube / no · ● larger disc / yes. Player highlights show recorded pieces only.</p> }
 
 @code {
     [Parameter, EditorRequired] public BoardState Board { get; set; } = default!;
+    [Parameter] public ContentCatalog? Content { get; set; }
     [Parameter] public Position? Selected { get; set; }
     [Parameter] public EventCallback<Position> SelectedChanged { get; set; }
     [Parameter] public IReadOnlyList<Marker> Markers { get; set; } = Array.Empty<Marker>();
-    private bool _showPieces;
     private Position? _hovered, _focused;
+    private string? _previewFilter, _focusFilter, _pinnedFilter;
+    private string? ActiveFilter => _previewFilter ?? _focusFilter ?? _pinnedFilter;
+    private string FilterColor => ActiveFilter?.StartsWith("book:") == true ? "book-" + ColorFor(ActiveFilter[5..]) : "";
     private const double Radius = 24;
-    private string ColorFor(string book) => Catalog.Prototypes.Index<ClueBookPrototype>(book).Color;
+    private sealed record LegendEntry(string Group, string Key, string Value, string Label, string Css, string AccessibleLabel);
+    private IEnumerable<LegendEntry> Legend
+    {
+        get
+        {
+            foreach (var terrain in Enum.GetValues<Terrain>())
+                yield return new("Landscape", "terrain:" + terrain, terrain.ToString(), terrain.ToString(), "swatch " + terrain.ToString().ToLowerInvariant(), "Highlight " + terrain + " terrain");
+            foreach (var animal in new[] { Animal.Bear, Animal.Cougar })
+                yield return new("Landscape", "animal:" + animal, animal.ToString(), animal.ToString(), "", "Highlight " + animal + " territory");
+            foreach (var kind in Enum.GetValues<StructureKind>())
+                yield return new("Structures", "kind:" + kind, kind.ToString(), kind == StructureKind.Stone ? "Stones" : "Shacks", "", "Highlight " + kind + " structures");
+            foreach (var color in Board.Definition.Structures.Select(s => s.Color).Distinct().Order())
+                yield return new("Structures", "color:" + color, color.ToString(), color.ToString(), "structure-key-" + color.ToString().ToLowerInvariant(), "Highlight " + color + " structures");
+            foreach (var book in Markers.Select(m => m.Book).Distinct().Order())
+                yield return new("Players", "book:" + book, book, book, "book-" + ColorFor(book), "Highlight " + book + " pieces");
+        }
+    }
+    private bool MatchesFilter(BoardSpace space)
+    {
+        if (ActiveFilter is null) return false;
+        var parts = ActiveFilter.Split(':', 2);
+        return parts[0] switch
+        {
+            "terrain" => space.Terrain.ToString() == parts[1],
+            "animal" => space.Animal.ToString() == parts[1],
+            "kind" => space.Structure?.Kind.ToString() == parts[1],
+            "color" => space.Structure?.Color.ToString() == parts[1],
+            "book" => Markers.Any(m => m.Book == parts[1] && m.Position == space.Position),
+            _ => false
+        };
+    }
+    private void ClearFilter() => (_previewFilter, _focusFilter, _pinnedFilter) = (null, null, null);
+    private static (double X, double Y) PieceSlot(int index, int count) => count <= 3
+        ? ((index - (count - 1) / 2.0) * 10, 0)
+        : index < 3 ? ((index - 1) * 10, -3) : ((index - 3 - (count - 4) / 2.0) * 10, 6);
+    private string ColorFor(string book) => (Content ?? Catalog).Prototypes.Index<ClueBookPrototype>(book).Color;
     private (double X, double Y) Pixel(BoardSpace space) => HexCoordinates.ToPixel(space.Hex, Board.Definition.Orientation, Radius);
     private string ViewBox
     {
@@ -87,10 +154,10 @@
             return $"{F(pixels.Min(p => p.X) - 28)} {F(pixels.Min(p => p.Y) - 28)} {F(pixels.Max(p => p.X) - pixels.Min(p => p.X) + 56)} {F(pixels.Max(p => p.Y) - pixels.Min(p => p.Y) + 56)}";
         }
     }
-    private string Points(double x, double y) => string.Join(" ", Enumerable.Range(0, 6).Select(i =>
+    private string Points(double x, double y, double radius = Radius) => string.Join(" ", Enumerable.Range(0, 6).Select(i =>
     {
         var angle = (i * 60 + (Board.Definition.Orientation == Hex.Orientation.PointTop ? 30 : 0)) * System.Math.PI / 180;
-        return $"{F(x + Radius * System.Math.Cos(angle))},{F(y + Radius * System.Math.Sin(angle))}";
+        return $"{F(x + radius * System.Math.Cos(angle))},{F(y + radius * System.Math.Sin(angle))}";
     }));
     private static string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private static string Label(BoardSpace s) => $"{s.Position}, {s.Terrain}" + (s.Animal == Animal.None ? "" : $", {s.Animal} territory") +

@@ -9,6 +9,7 @@ public sealed record TurnRecord(int Number, string Action, Position Position, IR
 public sealed class SessionSave
 {
     public int Version { get; set; } = 1;
+    public Guid SessionId { get; set; }
     public string Catalog { get; set; } = "";
     public string Card { get; set; } = "";
     public int Players { get; set; }

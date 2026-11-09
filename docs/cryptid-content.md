@@ -95,6 +95,10 @@ Startup/import diagnostics include filenames and YAML entry lines, duplicate IDs
 
 Local browser saves are versioned and bound to a content fingerprint. They preserve assignments, deterministic random progress, public pieces, phase, owed human cubes and the journal. Reload does not reselect clues. Incompatible or malformed saves display a recovery notice rather than crashing the app. Starting a new game replaces an incompatible save.
 
+Display preferences (pieces and coordinate labels) are saved separately from game content, so changing them does not change clue assignments or invalidate a game. Completed games appear under Past games at camp with a read-only Review link. Each archive includes its original YAML content and a stable session ID; even repeated seeded games are separate expeditions. Existing completed saves are archived when loaded. Reviews create an independent session and never replace an active expedition.
+
+Legend highlights use only public terrain, animal/structure features, and recorded player pieces, never hidden clue rules. They support hover, keyboard focus, and tap/click pinning.
+
 This is an entirely client-side app. Hidden assignments are not rendered or logged, but local storage and application memory are inspectable by the device owner; the app does not claim server-side secret protection. Do not inspect saves if you want to preserve the puzzle.
 
 ## Data provenance
