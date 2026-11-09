@@ -2,7 +2,7 @@ name: Deploy Cryptid Companion to Pages
 
 on:
   push:
-    branches: [work]
+    branches: [master]
   workflow_dispatch:
 
 permissions:

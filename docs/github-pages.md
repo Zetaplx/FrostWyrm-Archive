@@ -6,13 +6,13 @@ Cryptid Companion is published as a standalone static PWA. The intended project 
 
 ## Deployment source
 
-`.github/workflows/pages.yml` publishes pushes to **work**, the branch containing the application. It builds and tests the solution, publishes Release assets, reads GitHub's Pages base path, prepares the artifact, runs the browser suite against that actual subdirectory, and deploys only after those checks pass. A failed build/test leaves the previous deployment in place.
+`.github/workflows/pages.yml` publishes pushes to **master**, the release branch. It builds and tests the solution, publishes Release assets, reads GitHub's Pages base path, prepares the artifact, runs the browser suite against that actual subdirectory, and deploys only after those checks pass. A failed build/test leaves the previous deployment in place.
 
-The `github-pages` environment must permit deployments from `work`. If the deployment source is later changed to `master`, merge the application and workflow there first, then update the workflow branch filter and environment branch policy together. The workflow also includes `workflow_dispatch`; GitHub's manual dispatch UI requires the workflow to exist on the repository's default branch.
+The `github-pages` environment must permit deployments from `master`. Development work can continue on `work`; promoting a tested commit to `master` publishes it. Manual deployment is also available through **Actions → Deploy Cryptid Companion to Pages → Run workflow** on `master`.
 
 ## One-time repository configuration
 
-A repository administrator enables **Settings → Pages → Build and deployment → Source: GitHub Actions**. If `github-pages` has deployment branch restrictions, allow `work` in **Settings → Environments → github-pages**. No personal access token is stored in this workflow. It uses GitHub's short-lived action token with `pages: write` and `id-token: write` only for deployment.
+A repository administrator enables **Settings → Pages → Build and deployment → Source: GitHub Actions**. If `github-pages` has deployment branch restrictions, allow `master` in **Settings → Environments → github-pages**. No personal access token is stored in this workflow. It uses GitHub's short-lived action token with `pages: write` and `id-token: write` only for deployment.
 
 The deployment publishes the app and its bundled content publicly. Saves remain in each visitor's browser. GitHub Pages availability for private repositories depends on the repository's GitHub plan; the workflow never changes repository visibility.
 

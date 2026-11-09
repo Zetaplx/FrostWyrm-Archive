@@ -50,4 +50,4 @@ The Core assembly preserves the `FrostWyrm.Archive` namespaces and `FrostWyrm.In
 
 ## GitHub Pages
 
-The deployment workflow publishes the `work` branch to GitHub Pages after solution and browser checks pass. See [Pages setup and deployment](docs/github-pages.md) for the target URL, repository settings, subdirectory routing, and offline validation.
+The deployment workflow publishes the `master` branch to GitHub Pages after solution and browser checks pass. See [Pages setup and deployment](docs/github-pages.md) for the target URL, repository settings, subdirectory routing, and offline validation.
