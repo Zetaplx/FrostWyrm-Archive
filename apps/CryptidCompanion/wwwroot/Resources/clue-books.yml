@@ -1,6 +1,6 @@
 - type: clueBook
   id: Alpha
-  color: blue
+  color: red
   clues: [water-forest, water-desert, water-mountain, water-swamp, forest-desert, forest-mountain, forest-swamp, desert-mountain, desert-swamp, mountain-swamp, near-water, near-forest, near-desert, near-mountain, near-swamp, near-animal, near-bear, near-cougar, near-stone, near-shack, near-blue, near-green, near-white]
 
 - type: clueBook
@@ -10,15 +10,15 @@
 
 - type: clueBook
   id: Gamma
-  color: purple
+  color: blue
   clues: [water-forest, water-desert, water-mountain, water-swamp, forest-desert, forest-mountain, forest-swamp, desert-mountain, desert-swamp, mountain-swamp, near-water, near-forest, near-desert, near-mountain, near-swamp, near-animal, near-bear, near-cougar, near-stone, near-shack, near-blue, near-green, near-white]
 
 - type: clueBook
   id: Delta
-  color: red
+  color: orange
   clues: [water-forest, water-desert, water-mountain, water-swamp, forest-desert, forest-mountain, forest-swamp, desert-mountain, desert-swamp, mountain-swamp, near-water, near-forest, near-desert, near-mountain, near-swamp, near-animal, near-bear, near-cougar, near-stone, near-shack, near-blue, near-green, near-white]
 
 - type: clueBook
   id: Epsilon
-  color: yellow
+  color: black
   clues: [water-forest, water-desert, water-mountain, water-swamp, forest-desert, forest-mountain, forest-swamp, desert-mountain, desert-swamp, mountain-swamp, near-water, near-forest, near-desert, near-mountain, near-swamp, near-animal, near-bear, near-cougar, near-stone, near-shack, near-blue, near-green, near-white]

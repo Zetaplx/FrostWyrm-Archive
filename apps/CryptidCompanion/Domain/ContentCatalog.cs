@@ -97,7 +97,7 @@ public sealed class ContentCatalog : IManager
         foreach (var book in prototypes.EnumeratePrototypes<ClueBookPrototype>())
         {
             if (book.Clues.Count == 0 || book.Clues.Select(c => c.ID).Distinct().Count() != book.Clues.Count ||
-                !new[] { "blue", "green", "purple", "red", "yellow" }.Contains(book.Color))
+                !new[] { "red", "green", "blue", "orange", "black" }.Contains(book.Color))
                 errors.Add($"Book {book.ID}: expected a player color and distinct clue references.");
             foreach (var clue in book.Clues) Reference(clue, $"Book {book.ID}");
         }
@@ -129,15 +129,18 @@ public sealed class ContentCatalog : IManager
                 if (setup.PlayerCount is < 3 or > 5 || setup.Books.Count != setup.PlayerCount || setup.Books.Select(b => b.ID).Distinct().Count() != setup.PlayerCount)
                     errors.Add($"{context}: {setup.PlayerCount}-player setup needs exactly that many different books.");
                 foreach (var book in setup.Books) Reference(book, context);
-                foreach (var (book, clues) in setup.Candidates)
+                foreach (var (book, clue) in setup.Assignments)
                 {
-                    if (!setup.Books.Any(b => b.ID == book) || clues.Count == 0) errors.Add($"{context}: invalid candidate pool for {book}.");
-                    foreach (var clue in clues)
-                    {
-                        if (Reference(clue, context) && prototypes.EnumeratePrototypes<ClueBookPrototype>().FirstOrDefault(b => b.ID == book) is { } definition &&
-                            !definition.Clues.Any(c => c.ID == clue.ID)) errors.Add($"{context}: clue {clue.ID} is not in book {book}.");
-                    }
+                    if (!setup.Books.Any(b => b.ID == book)) errors.Add($"{context}: assignment for unused book {book}.");
+                    Reference(clue, context);
                 }
+                try
+                {
+                    var board = new BoardState(prototypes.Index(card.Board!), prototypes);
+                    CardClues.Resolve(setup, board, prototypes);
+                }
+                catch (Exception exception) { errors.Add($"{context}, {setup.PlayerCount} players: {exception.Message}"); }
+
             }
         }
     }

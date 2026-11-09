@@ -2,7 +2,7 @@
 
 The first playable version uses the reference image supplied by the project owner. The six tile orientations and all six structure positions/types were confirmed in chat. It is labeled **Reference expedition**, not assigned an unverified printed card number. It supports 3, 4 and 5 clue-holders and all 23 Normal Mode clue categories.
 
-The companion generates unique-solution clue assignments for this board. It does not pretend that generated assignments correspond to printed clue-book numbers. Choose the human clue by its rule description. Opponent assignments remain hidden in the interface; no opponent takes independent turns.
+Every supported player count has a fixed, tested set of clues stored on the setup card. The player chooses only their color; the card assigns their clue. The test assignments are not asserted to match printed clue-book numbers. Opponent assignments remain hidden in the interface; no opponent takes independent turns.
 
 ## Resource files
 
@@ -13,7 +13,7 @@ All files are under `apps/CryptidCompanion/wwwroot/Resources` and load through A
 | `tiles.yml` | Six physical tiles, each with 18 row/column terrain/animal definitions |
 | `companion-setups.yml` | Reference board, structures, and supported player counts |
 | `clues.yml` | 10 terrain pairs, 5 terrain-distance clues, any-animal clue, 2 specific-animal clues, 2 structure-kind clues, 3 structure-color clues |
-| `clue-books.yml` | Player colors and typed clue pools |
+| `clue-books.yml` | Correct physical book colors and typed clue definitions |
 | `setup-cards.yml` | Historical printed-card-4 clue numbers, without verified board/book mapping; not offered for play |
 
 Tile cell coordinates, tile origins, and structure positions are **zero-based** in YAML. The UI labels rows A–I and columns 1–12. The reference board has flat-top hexes with odd columns shifted down; there are no wraparound edges. `flipped: true` rotates the tile 180 degrees, reversing both local row and column. The shared `HexCoordinates` abstraction converts offset positions to integer axial coordinates; the original structural conversion's truncation behavior is preserved, including negative indices.
@@ -49,26 +49,39 @@ Copy the complete board and setup-card entries from `companion-setups.yml`, give
   setups:
   - playerCount: 3
     books: [Alpha, Beta, Gamma]
-  - playerCount: 4
-    books: [Alpha, Beta, Gamma, Delta]
-  - playerCount: 5
-    books: [Alpha, Beta, Gamma, Delta, Epsilon]
+    assignments:
+      Alpha: water-desert
+      Beta: near-animal
+      Gamma: near-stone
 ```
 
 This excerpt intentionally omits five tiles/structures; it is a schema illustration, not a complete import. Copying the existing full file and changing IDs is the quickest valid starting point.
 
-For a fixed printed assignment, a setup can restrict each book's candidate clues:
+## Set the card’s clues (the main manual edit)
+
+Every `setups` entry must contain **one fixed clue for every listed book**. There is no clue picker and no randomized assignment. Changing the human’s color or the random seed never changes these assignments.
 
 ```yaml
   - playerCount: 3
     books: [Alpha, Beta, Gamma]
-    candidates:
-      Alpha: [water-forest]
-      Beta: [near-bear, near-cougar]
-      Gamma: [near-white]
+    assignments:
+      Alpha: water-desert
+      Beta: near-animal
+      Gamma: near-stone
 ```
 
-Keys must name books in that setup; clue IDs must exist in those books. A singleton pool fixes a book's clue. An omitted pool uses that book's entire clue list. Only human clues compatible with at least one unique-solution combination are offered; an unsatisfiable combination never starts a game.
+This is the complete, playable 3-player test assignment for the supplied reference board. In `companion-setups.yml`, change the values after the book names when adding a real card. Give each card its own ID and add analogous entries for 4/5 players. All book names in `books` must have exactly one assignment; no extra book names are allowed. Startup validates all references, legal opening spaces, and an intersection of exactly one habitat before offering the setup. Invalid or incomplete assignments never start a game.
+
+Book colors are **Alpha red, Beta green, Gamma blue, Delta orange, Epsilon black**. Structure colors remain blue, green, white and are independent of player colors.
+
+Available clue IDs are human-readable:
+
+- Terrain pairs: `water-forest`, `water-desert`, `water-mountain`, `water-swamp`, `forest-desert`, `forest-mountain`, `forest-swamp`, `desert-mountain`, `desert-swamp`, `mountain-swamp`.
+- Within 1 of terrain: `near-water`, `near-forest`, `near-desert`, `near-mountain`, `near-swamp`.
+- Within 1 of any animal territory: `near-animal`.
+- Within 2 of a specific animal territory: `near-bear`, `near-cougar`.
+- Within 2 of a structure kind: `near-stone`, `near-shack`.
+- Within 3 of a structure color: `near-blue`, `near-green`, `near-white`.
 
 Import a complete `.yml`/`.yaml` pack using **Content packs & printed cards** at camp, before starting a game. Imports are validated transactionally and retained in this browser. A failed import keeps the previous working catalog. For shipped resources, add the file to the list in `Program.cs` (or append entries to an already-loaded file). Typed prototype discovery does not require individual type registration.
 
@@ -76,7 +89,7 @@ Import a complete `.yml`/`.yaml` pack using **Content packs & printed cards** at
 
 Normal Mode supports `TerrainPair`, `NearTerrain`, `NearAnimal`, `NearStructure`, and `NearColor`. Parameters live in YAML; the same rule evaluates every instance. Distance includes zero. Negative/black-structure clues and Advanced Mode are intentionally outside this first version.
 
-Startup/import diagnostics include filenames and YAML entry lines, duplicate IDs, required fields, missing typed references, normal rule parameters, player-count/book mismatches, invalid cells, tile overlaps/gaps, and invalid structures. An unsatisfiable human clue is filtered out of clue selection. A pack without any playable combination displays an explicit selection error instead of starting a broken session.
+Startup/import diagnostics include filenames and YAML entry lines, duplicate IDs, required fields, missing typed references, normal rule parameters, player-count/book mismatches, invalid cells, tile overlaps/gaps, and invalid structures. Missing, incomplete, duplicate, and non-unique card assignments are reported during content loading instead of starting a broken session.
 
 ## Saves and secrecy
 

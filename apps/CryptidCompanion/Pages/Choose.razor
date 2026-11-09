@@ -4,47 +4,37 @@
 @inject GameManager Game
 @inject BrowserSessionStore Storage
 @inject NavigationManager Navigation
-<PageTitle>Your clue · Cryptid Companion</PageTitle>
-<p class="eyebrow">02 / YOUR FIELD NOTES</p><h1>Choose what you know.</h1>
+<PageTitle>Your color · Cryptid Companion</PageTitle>
+<p class="eyebrow">02 / YOUR FIELD NOTES</p><h1>Choose your color.</h1>
 @if (Game.HasSession)
-{ <p>An expedition is already active. Clues stay fixed until you end it.</p><a class="button" href="@(Game.Phase == SessionPhase.Opening ? "opening" : "game")">Resume expedition</a> }
+{ <p>An expedition is already active. The card’s clues stay fixed until you end it.</p><a class="button" href="@(Game.Phase == SessionPhase.Opening ? "opening" : "game")">Resume expedition</a> }
 else if (_setup is null)
 { <p>Choose a setup first.</p><a href="">Back to camp</a> }
 else
 {
-    <section class="panel narrow"><p>Choose your book and a clue to hold. Every offered clue can be paired with hidden clues that leave exactly one habitat for this board and player count.</p>
-        <label for="book">Your clue book</label><select id="book" @bind="_book" @bind:after="Refresh">
-            @foreach (var book in _setup.Books) { <option value="@book.ID">@book.ID · @Catalog.Prototypes.Index(book).Color</option> }
+    <section class="panel narrow"><p>The setup card assigns every clue. Choose which color you will play; your clue will be shown next, and the other books stay sealed.</p>
+        <label for="book">Your color</label><select id="book" @bind="_book">
+            @foreach (var book in _setup.Books) { <option value="@book.ID">@Catalog.Prototypes.Index(book).Color · @book.ID</option> }
         </select>
-        <label for="clue">Your clue</label><select id="clue" @bind="_clue">
-            @foreach (var clue in _clues) { <option value="@clue.ID">@clue.Text</option> }
-        </select>
-        @if (_clues.Count == 0) { <p role="alert">No unique-solution game is available for this book and setup.</p> }
-        <p class="field-note">Distance includes the feature’s own space. Other clue assignments stay hidden. These are rule descriptions, not unverified printed clue-book numbers.</p>
-        <details><summary>Reproducible expedition</summary><label for="seed">Optional random seed</label><input id="seed" type="number" @bind="_seed" /><p class="field-note">The same setup, clue and seed generate the same expedition. Leave blank for fresh randomness.</p></details>
+        <p class="field-note">Changing your color changes which clue you receive, not the card’s assignments.</p>
+        <details><summary>Reproducible opening cubes</summary><label for="seed">Optional random seed</label><input id="seed" type="number" @bind="_seed" /><p class="field-note">The seed controls random cube placements. It never changes the card’s clues.</p></details>
         @if (_error is not null) { <p role="alert" class="error">@_error</p> }
-        <button class="button full" @onclick="Begin" disabled="@(_clues.Count == 0)">Seal the other clues →</button>
+        <button class="button full" @onclick="Begin">Take my assigned clue →</button>
     </section>
 }
 @code {
     private PlayerSetup? _setup;
-    private string _book = "", _clue = "";
+    private string _book = "";
     private int? _seed;
     private string? _error;
-    private IReadOnlyList<CluePrototype> _clues = Array.Empty<CluePrototype>();
     protected override void OnInitialized()
     {
         _setup = Catalog.Cards.FirstOrDefault(c => c.ID == State.DraftCard)?.Setups.FirstOrDefault(s => s.PlayerCount == State.DraftPlayers);
-        if (_setup is not null) { _book = _setup.Books[0].ID; Refresh(); }
-    }
-    private void Refresh()
-    {
-        try { _clues = Game.AvailableClues(State.DraftCard, State.DraftPlayers, _book); _clue = _clues.FirstOrDefault()?.ID ?? ""; _error = null; }
-        catch (Exception exception) { _error = exception.Message; _clues = Array.Empty<CluePrototype>(); }
+        if (_setup is not null) _book = _setup.Books[0].ID;
     }
     private async Task Begin()
     {
-        try { Game.Begin(State.DraftCard, State.DraftPlayers, _book, _clue, _seed); await Storage.Save(); Navigation.NavigateTo("opening"); }
+        try { Game.Begin(State.DraftCard, State.DraftPlayers, _book, _seed); await Storage.Save(); Navigation.NavigateTo("opening"); }
         catch (Exception exception) { _error = exception.Message; }
     }
 }

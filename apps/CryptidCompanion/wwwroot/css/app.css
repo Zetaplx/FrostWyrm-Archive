@@ -607,3 +607,32 @@ pre {
 h1:focus {
     outline:none
 }
+
+/* Selection is a final SVG overlay, above every neighboring cell and piece. */
+.hex-cell.selected .terrain { stroke: var(--paper); stroke-width: 1.5; filter: none; }
+.selection-overlay { pointer-events: none; }
+.selection-overlay polygon { fill: none; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.selection-halo { stroke: #102e27; stroke-width: 7; }
+.selection-outline { stroke: #ffe9a5; stroke-width: 3; }
+.book-red { color: #bd302e; }
+.book-green { color: #247549; }
+.book-blue { color: #285bd2; }
+.book-orange { color: #ce6219; }
+.book-black { color: #202522; }
+.player-orange { color: #ad4c0d; }
+.player-black { color: #202522; }
+.piece-toggle { display: flex; gap: .6rem; align-items: center; margin: 0 0 1rem; cursor: pointer; }
+.piece-toggle input[type=checkbox] { width: 1.1rem; height: 1.1rem; padding: 0; margin: 0; accent-color: var(--forest); }
+.board-piece { pointer-events: none; }
+.piece-shape { fill: currentColor; stroke: #fffef8; stroke-width: .8; }
+.book-dot { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; background: currentColor; margin-right: .3rem; }
+.latest-answer { padding: 1rem; margin-bottom: 1.5rem; background: #eef2e7; border: 2px solid #61826c; border-radius: 4px; }
+.latest-answer .eyebrow { margin-bottom: .7rem; }
+.latest-answer h2 { font-size: 1.45rem; margin-bottom: .7rem; }
+.answer-row { display: flex; align-items: center; gap: .7rem; padding: .65rem 0; border-top: 1px solid #c7d4c4; }
+.answer-row strong, .answer-row div>span { display: block; font-size: .85rem; }
+.answer-symbol { font-size: 2rem; line-height: 1; }
+.interaction-overlay { pointer-events: none; }
+.interaction-overlay polygon { fill: none; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.interaction-overlay .selection-halo { stroke-width: 5; }
+.interaction-overlay .selection-outline { stroke: #fffef8; stroke-width: 2; }

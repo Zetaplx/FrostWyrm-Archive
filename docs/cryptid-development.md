@@ -13,7 +13,7 @@ The development profile uses port 5002. In this prepared cloud environment, acti
 
 `GameManager` owns the session and legal actions. Board geometry and clue evaluation live in `Domain`, content in YAML prototypes, persistence in `Services`, and presentation in Razor components. Cryptid-specific rules stay out of Archive. `FrostWyrm.Math.HexCoordinates` supplies the reusable offset/axial boundary, alongside the existing vertex-capable `Hex` API.
 
-The .NET suite exercises all 23 rules over all 108 cells against an independent graph-traversal oracle, confirmed image placements, negative-index coordinate round trips, valid clue intersections, opening cubes, question/search legality, first-no stopping, penalties, deterministic sessions, save/restore and content validation. Existing Archive tests remain in place.
+The .NET suite exercises all 23 rules over all 108 cells against an independent graph-traversal oracle, confirmed image placements, negative-index coordinate round trips, fixed card assignments independent of player color/seed, valid clue intersections, opening cubes, question/search legality, first-no stopping, penalties, deterministic sessions, save/restore and content validation. Existing Archive tests remain in place.
 
 ## Browser tests
 

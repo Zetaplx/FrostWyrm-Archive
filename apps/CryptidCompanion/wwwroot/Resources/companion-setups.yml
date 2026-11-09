@@ -51,7 +51,22 @@
   setups:
   - playerCount: 3
     books: [Alpha, Beta, Gamma]
+    assignments:
+      Alpha: water-desert
+      Beta: near-animal
+      Gamma: near-stone
   - playerCount: 4
     books: [Alpha, Beta, Gamma, Delta]
+    assignments:
+      Alpha: water-forest
+      Beta: water-desert
+      Gamma: near-desert
+      Delta: near-animal
   - playerCount: 5
     books: [Alpha, Beta, Gamma, Delta, Epsilon]
+    assignments:
+      Alpha: water-forest
+      Beta: water-desert
+      Gamma: near-forest
+      Delta: near-desert
+      Epsilon: near-mountain

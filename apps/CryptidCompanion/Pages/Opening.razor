@@ -6,7 +6,7 @@
 <PageTitle>Opening information · Cryptid Companion</PageTitle>
 <p class="eyebrow">03 / FIRST SIGNS</p><h1>Mark what cannot be.</h1>
 @if (!Game.HasSession)
-{ <p>Choose your clue before opening the other field journals.</p><a class="button" href="">Go to base camp</a> }
+{ <p>Choose your color before opening the other field journals.</p><a class="button" href="">Go to base camp</a> }
 else if (Game.Phase != SessionPhase.Opening)
 { <p>Opening information is already recorded.</p><a class="button" href="game">Return to game</a> }
 else
@@ -23,7 +23,7 @@ else
         </select><button class="button" @onclick="Place" disabled="@(Game.PendingHumanCubes == 0)">Place my cube</button></div>
         <p role="status">@Game.PendingHumanCubes opening cubes remaining. @string.Join(", ", Game.Markers.Where(m => m.Book == Game.HumanBook).Select(m => m.Position))</p>
         @if (_error is not null) { <p role="alert" class="error">@_error</p> }
-        <BoardView Board="Game.Board!" Selected="SelectedPosition" SelectedChanged="Select" />
+        <BoardView Markers="Game.Markers" Board="Game.Board!" Selected="SelectedPosition" SelectedChanged="Select" />
         <button class="button" @onclick="Continue" disabled="@(Game.PendingHumanCubes != 0)">All cubes placed — begin expedition →</button>
     </section>
 }

@@ -9,7 +9,7 @@ This repository brings forward the implemented infrastructure from [Zetaplx/Fros
 - YAML data definitions, custom deserializers, typed prototype IDs, and prototype loading and lookup.
 - A Blazor service-registration bridge using the same Archive manager instances.
 - Hex coordinates, hex-grid storage, and YAML hex deserialization.
-- A standalone Blazor WebAssembly/PWA with the confirmed reference board, all 23 Normal Mode clue categories, unique-solution clue selection, opening cubes, questions, legal searches and penalties, a winning-game flow, local saves, and offline support for 3–5 clue-holders.
+- A standalone Blazor WebAssembly/PWA with the confirmed reference board, all 23 Normal Mode clue categories, fixed card-defined unique-solution clues, opening cubes, questions, legal searches and penalties, a winning-game flow, local saves, and offline support for 3–5 clue-holders.
 - Core behavior and integration tests, run by GitHub Actions on pushes and pull requests to `master`.
 
 Entity/component storage, system scheduling, queries, prototype inheritance, and snapshot serialization are still planned. The confirmed reference layout is playable end to end; additional printed card/book catalogs and Advanced Mode remain outside this first release.
@@ -30,7 +30,7 @@ Run the example with:
 dotnet run --project apps/CryptidCompanion --launch-profile http
 ```
 
-The development server uses port 5002. Choose **Reference expedition**, build the board shown, choose your clue, and follow the opening/game screens. The tile orientations and structures match the supplied reference image, including the corrected stone/shack types. No credentials, database, or external application services are needed.
+The development server uses port 5002. Choose **Reference expedition**, build the board shown, choose your color, and follow the opening/game screens. The tile orientations and structures match the supplied reference image, including the corrected stone/shack types. No credentials, database, or external application services are needed.
 
 See [content authoring](docs/cryptid-content.md) for easy YAML layout changes, and [development and offline testing](docs/cryptid-development.md) for browser tests, production publishing, and PWA instructions.
 

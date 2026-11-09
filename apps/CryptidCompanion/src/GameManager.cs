@@ -35,19 +35,12 @@ public sealed class GameManager : IManager
     public int PlayerCount { get; private set; }
     public PlayerSetup? CurrentSetup { get; private set; }
 
-    public IReadOnlyList<CluePrototype> AvailableClues(string cardId, int players, string human)
+    public void Begin(string cardId, int players, string human, int? seed = null)
     {
         var (card, setup, board) = Prepare(cardId, players);
-        var selection = new ClueSelection(board, setup, _catalog.Prototypes);
-        return selection.Candidates(human).Where(clue => selection.Find(human, clue.ID, new GameRandom(0)) is not null).ToArray();
-    }
-
-    public void Begin(string cardId, int players, string human, string clueId, int? seed = null)
-    {
-        var (card, setup, board) = Prepare(cardId, players);
+        if (!setup.Books.Any(b => b.ID == human)) throw new InvalidOperationException("Choose a color used by this setup.");
+        var assignments = CardClues.Resolve(setup, board, _catalog.Prototypes);
         var random = new GameRandom(seed ?? RandomNumberGenerator.GetInt32(int.MaxValue));
-        var assignments = new ClueSelection(board, setup, _catalog.Prototypes).Find(human, clueId, random)
-            ?? throw new InvalidOperationException("That clue cannot form a unique-solution game for this card and player count.");
         Card = card; CurrentSetup = setup; Board = board; PlayerCount = players;
         CardNumber = int.TryParse(card.ID, out var number) ? number : 0;
         HumanBook = human; _assignments = assignments; _random = random;
@@ -161,9 +154,9 @@ public sealed class GameManager : IManager
         var save = JsonSerializer.Deserialize<SessionSave>(json) ?? throw new InvalidOperationException("Empty saved game.");
         if (save.Version != 1 || save.Catalog != _catalog.Fingerprint) throw new InvalidOperationException("This save uses different content. Start a new game or restore its original content pack.");
         var (card, setup, board) = Prepare(save.Card, save.Players);
-        var selection = new ClueSelection(board, setup, _catalog.Prototypes);
+        var expected = CardClues.Resolve(setup, board, _catalog.Prototypes);
         if (save.Assignments.Count != setup.Books.Count || !save.Assignments.ContainsKey(save.Human) || save.Assignments.Values.Distinct().Count() != setup.Books.Count ||
-            setup.Books.Any(b => !save.Assignments.TryGetValue(b.ID, out var clue) || !selection.Candidates(b.ID).Any(c => c.ID == clue)))
+            setup.Books.Any(b => !save.Assignments.TryGetValue(b.ID, out var clue) || expected[b.ID] != clue))
             throw new InvalidOperationException("Saved clue assignments are invalid.");
         var intersection = board.Spaces.Select(s => s.Position).ToHashSet();
         foreach (var clue in save.Assignments.Values) intersection.IntersectWith(ClueEvaluator.Evaluate(_catalog.Prototypes.Index<CluePrototype>(clue), board));

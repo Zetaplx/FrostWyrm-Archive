@@ -24,8 +24,7 @@ public sealed class CompanionDomainTests
     private static (ContentCatalog Catalog, GameManager Game, SessionSave Save) Start(int players = 3, int seed = 42, string human = "Alpha")
     {
         var catalog = Catalog(); var game = Game(catalog);
-        var clue = game.AvailableClues("companion-1", players, human).First();
-        game.Begin("companion-1", players, human, clue.ID, seed);
+        game.Begin("companion-1", players, human, seed);
         return (catalog, game, JsonSerializer.Deserialize<SessionSave>(game.Export())!);
     }
     private static bool Matches(ContentCatalog catalog, GameManager game, SessionSave save, string book, Position p)
@@ -117,23 +116,22 @@ public sealed class CompanionDomainTests
     }
 
     [Theory]
-    [InlineData(3, "Alpha")]
-    [InlineData(3, "Beta")]
-    [InlineData(4, "Gamma")]
-    [InlineData(5, "Epsilon")]
-    public void OfferedHumanCluesAlwaysProduceUniqueSolutionsAndLegalOpeningCubes(int players, string human)
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public void CardAssignmentsStayFixedAcrossHumanColorsAndRandomSeeds(int players)
     {
-        var catalog = Catalog(); var game = Game(catalog);
-        var clues = game.AvailableClues("companion-1", players, human);
-        Assert.NotEmpty(clues);
-        foreach (var clue in clues)
+        var catalog = Catalog();
+        var setup = catalog.Cards.Single().Setups.Single(s => s.PlayerCount == players);
+        foreach (var bookId in setup.Books)
+        foreach (var seed in new[] { 0, 140 })
         {
-            game.Begin("companion-1", players, human, clue.ID, 140);
+            var game = Game(catalog);
+            game.Begin("companion-1", players, bookId.ID, seed);
             var save = JsonSerializer.Deserialize<SessionSave>(game.Export())!;
-            var intersection = game.Board!.Spaces.Where(s => save.Assignments.Keys.All(b => Matches(catalog, game, save, b, s.Position))).ToArray();
-            Assert.Single(intersection);
-            Assert.Equal(clue.ID, save.Assignments[human]);
-            Assert.Equal(players, save.Assignments.Values.Distinct().Count());
+            Assert.Equal(setup.Assignments.OrderBy(p => p.Key).Select(p => (p.Key, p.Value.ID)),
+                save.Assignments.OrderBy(p => p.Key).Select(p => (p.Key, p.Value)));
+            Assert.Single(game.Board!.Spaces, s => save.Assignments.Keys.All(b => Matches(catalog, game, save, b, s.Position)));
             Assert.Equal(2 * (players - 1), game.Markers.Count);
             foreach (var book in game.Opponents)
             {
@@ -145,10 +143,31 @@ public sealed class CompanionDomainTests
     }
 
     [Fact]
+    public void PlayerColorsMatchThePhysicalBooks()
+    {
+        var catalog = Catalog();
+        foreach (var (book, color) in new Dictionary<string, string>
+            { ["Alpha"] = "red", ["Beta"] = "green", ["Gamma"] = "blue", ["Delta"] = "orange", ["Epsilon"] = "black" })
+            Assert.Equal(color, catalog.Prototypes.Index<ClueBookPrototype>(book).Color);
+    }
+
+    [Fact]
+    public void IncompleteAndNonUniqueCardAssignmentsFailAtContentLoad()
+    {
+        var files = Files();
+        files["companion-setups.yml"] = files["companion-setups.yml"].Replace("Gamma: near-stone", "Gamma: near-animal");
+        var errors = Assert.Throws<ContentException>(() => new ContentCatalog().Load(files)).Errors;
+        Assert.Contains(errors, e => e.Contains("assign exactly one distinct clue"));
+        files = Files();
+        files["companion-setups.yml"] = files["companion-setups.yml"].Replace("      Gamma: near-stone\n", "");
+        Assert.Throws<ContentException>(() => new ContentCatalog().Load(files));
+    }
+
+    [Fact]
     public void SeedAndReloadPreserveAssignmentsOpeningAndRandomSequence()
     {
         var (catalog, game, save) = Start();
-        var duplicate = Game(catalog); duplicate.Begin(save.Card, save.Players, save.Human, save.Assignments[save.Human], save.Seed);
+        var duplicate = Game(catalog); duplicate.Begin(save.Card, save.Players, save.Human, save.Seed);
         Assert.Equal(game.Export(), duplicate.Export());
         PayCubes(catalog, game, save); game.StartPlay();
         var restored = Game(catalog); restored.Restore(game.Export());

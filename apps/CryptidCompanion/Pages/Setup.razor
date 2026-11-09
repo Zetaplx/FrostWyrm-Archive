@@ -6,7 +6,7 @@
 @if (_board is not null && _card is not null)
 {
     <p class="eyebrow">01 / PHYSICAL SETUP</p><h1>Lay out the landscape.</h1><p class="lede">@_card.Name · @_card.Source</p>
-    <section class="panel"><BoardView Board="_board" />
+    <section class="panel"><BoardView Markers="Game.Markers" Board="_board" />
         <p class="field-note">Look at the reference from above. Rows run A–I, top to bottom; columns run 1–12, left to right. “Flipped” means rotate the numbered tile 180°.</p>
     </section>
     <div class="two-up"><section class="panel"><h2>Six tiles</h2><ul class="data-list">
@@ -14,7 +14,7 @@
     </ul></section><section class="panel"><h2>Six structures</h2><ul class="data-list">
         @foreach (var structure in _board.Definition.Structures) { <li><strong>@structure.Color @structure.Kind</strong><span>@structure.Position</span></li> }
     </ul></section></div>
-    <a class="button" href="@(Game.HasSession ? (Game.Phase == SessionPhase.Opening ? "opening" : "game") : "choose")">@(Game.HasSession ? "Return to expedition" : "Board ready — choose your clue") →</a>
+    <a class="button" href="@(Game.HasSession ? (Game.Phase == SessionPhase.Opening ? "opening" : "game") : "choose")">@(Game.HasSession ? "Return to expedition" : "Board ready — choose your color") →</a>
 }
 else { <h1>No board selected.</h1><p>Choose a supported setup at base camp first.</p><a class="button" href="">Go to base camp</a> }
 @code {

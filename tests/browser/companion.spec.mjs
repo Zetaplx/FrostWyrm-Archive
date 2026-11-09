@@ -33,10 +33,11 @@ async function start(page, players=3) {
   await page.getByRole('button',{name:/Prepare the board/}).click();
   await expect(page.locator('.hex-cell')).toHaveCount(108);
   await page.getByRole('link',{name:/Board ready/}).click();
-  await expect(page.getByLabel('Your clue',{exact:true})).toBeVisible();
-  await page.getByText('Reproducible expedition',{exact:true}).click();
+  await expect(page.getByLabel('Your color',{exact:true})).toBeVisible();
+  await page.getByText('Reproducible opening cubes',{exact:true}).click();
+  await expect(page.locator('select#clue')).toHaveCount(0);
   await page.getByLabel('Optional random seed').fill('42');
-  await page.getByRole('button',{name:/Seal the other clues/}).click();
+  await page.getByRole('button',{name:/Take my assigned clue/}).click();
   await expect(page.getByRole('heading',{name:'Mark what cannot be.'})).toBeVisible();
   for(let i=0;i<2;i++) {
     const save=await saved(page);const cell=cells.find(c=>!matches(save.Assignments[save.Human],c)&&!own(save,c));
@@ -58,6 +59,25 @@ for(const count of [3,4,5])test(`${count} clue-holders: opening, question, penal
   await start(page,count);
   let save=await saved(page);
   expect(save.Markers).toHaveLength(count*2);
+  const pieceToggle = page.getByRole('checkbox',{name:'Show recorded cubes and discs'});
+  await expect(page.locator('.board-piece')).toHaveCount(0);
+  await pieceToggle.check();
+  await expect(page.locator('.board-piece')).toHaveCount(save.Markers.length);
+  await expect(page.locator('.board-piece.book-red')).toHaveCount(2);
+  await expect(page.locator('.board-piece.book-green')).toHaveCount(2);
+  await expect(page.locator('.board-piece.book-blue')).toHaveCount(2);
+  if(count>=4)await expect(page.locator('.board-piece.book-orange')).toHaveCount(2);
+  if(count===5)await expect(page.locator('.board-piece.book-black')).toHaveCount(2);
+  for(const coordinate of ['A1','E6','I12']) {
+    await page.getByLabel('Selected space').selectOption(coordinate);
+    await expect(page.locator('.selection-overlay')).toBeVisible();
+    expect(await page.locator('.board').evaluate(svg=>svg.lastElementChild.classList.contains('selection-overlay'))).toBe(true);
+    expect((await page.locator('.selection-outline').getAttribute('points')).split(' ')).toHaveLength(6);
+  }
+  await page.getByRole('button',{name:/^E6,/}).hover();
+  await expect(page.locator('.interaction-overlay')).toBeVisible();
+  await pieceToggle.uncheck();
+  await expect(page.locator('.board-piece')).toHaveCount(0);
   const opponents=Object.keys(save.Assignments).filter(b=>b!==save.Human);
   const target=opponents[0];
   const negative=cells.find(c=>!cubed(save,c)&&!matches(save.Assignments[target],c));
@@ -67,6 +87,8 @@ for(const count of [3,4,5])test(`${count} clue-holders: opening, question, penal
   await page.getByRole('button',{name:`Ask about ${negative.label}`,exact:true}).click();
   await expect(page.getByText('You owe a cube.',{exact:true})).toBeVisible();
   await expect.poll(async()=>(await saved(page)).History.length).toBe(1);
+  await expect(page.getByRole('status',{name:'Latest answer'})).toContainText('NO — place a cube');
+  await expect(page.getByRole('status',{name:'Latest answer'})).toContainText(negative.label);
   await penalty(page);
   save=await saved(page);
   const failure=cells.find(c=>!cubed(save,c)&&matches(save.Assignments[save.Human],c)&&opponents.some(b=>!matches(save.Assignments[b],c)));

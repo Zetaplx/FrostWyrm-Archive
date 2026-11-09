@@ -29,6 +29,6 @@ public sealed class PlayerSetup
 
     [DataField] public List<ProtoId<ClueBookPrototype>> Books { get; init; } = new();
 
-    // Optional restrictions for a printed setup; absent entries use the book's full Normal Mode pool.
-    [DataField] public Dictionary<string, List<ProtoId<CluePrototype>>> Candidates { get; init; } = new();
+    // One card-defined clue per book. The player chooses a color, never a clue.
+    [DataField] public Dictionary<string, ProtoId<CluePrototype>> Assignments { get; init; } = new();
 }

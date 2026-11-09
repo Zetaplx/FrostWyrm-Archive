@@ -11,8 +11,25 @@ else if (Session.Phase == SessionPhase.Opening)
 else
 {
     <p class="lede">@Session.Card!.Name · @Session.PlayerCount clue-holders · You are @Session.HumanBook</p>
-    <div class="game-layout"><section class="panel map-panel"><BoardView Board="Session.Board!" Selected="SelectedPosition" SelectedChanged="Select" /><a href="setup">Review physical setup</a></section>
+    <div class="game-layout"><section class="panel map-panel"><BoardView Markers="Session.Markers" Board="Session.Board!" Selected="SelectedPosition" SelectedChanged="Select" /><a href="setup">Review physical setup</a></section>
     <section class="panel action-panel">
+        @if (Session.History.LastOrDefault() is { } latest)
+        {
+            <section class="latest-answer" role="status" aria-live="polite" aria-atomic="true" aria-label="Latest answer">
+                <p class="eyebrow">LATEST ANSWER · ACTION @latest.Number</p>
+                <h2>@latest.Action · @latest.Position</h2>
+                @foreach (var marker in latest.Placements.Where(m => m.Reason != "Failed search penalty"))
+                {
+                    var color = Catalog.Prototypes.Index<ClueBookPrototype>(marker.Book).Color;
+                    <div class="answer-row @(marker.Piece == Piece.Cube ? "answer-no" : "answer-yes")">
+                        <span class="answer-symbol book-@color" aria-hidden="true">@(marker.Piece == Piece.Cube ? "■" : "●")</span>
+                        <div><strong>@marker.Book · @color</strong><span>@(marker.Piece == Piece.Cube ? "NO — place a cube" : "YES — place a disc") at @marker.Position</span></div>
+                    </div>
+                }
+                @foreach (var marker in latest.Placements.Where(m => m.Reason == "Failed search penalty"))
+                { <p class="field-note">Additional cube: @marker.Book at @marker.Position (failed search).</p> }
+            </section>
+        }
         <details><summary>Your clue</summary><p>@Session.HumanClueText</p></details>
         @if (Session.Phase == SessionPhase.Won)
         { <div class="result success" role="status"><h2>Every clue agrees.</h2><p>The habitat is <strong>@Session.History.Last().Position</strong>. Your expedition is complete.</p><p>The other clues remain hidden.</p><a class="button" href="">Back to camp</a></div> }
