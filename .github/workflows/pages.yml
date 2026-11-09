@@ -1,0 +1,73 @@
+name: Deploy Cryptid Companion to Pages
+
+on:
+  push:
+    branches: [work]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/browser/package-lock.json
+      - name: Build and test the solution
+        run: dotnet test FrostWyrm-Archive.slnx
+      - name: Read Pages configuration
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Publish and prepare repository paths
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+        run: |
+          dotnet publish apps/CryptidCompanion -c Release -o artifacts/cryptid
+          python3 scripts/prepare_pages.py artifacts/cryptid/wwwroot --base-path "$PAGES_BASE_PATH"
+      - name: Browser dependencies
+        run: |
+          npm ci --prefix tests/browser
+          npm exec --prefix tests/browser -- playwright install --with-deps chromium
+      - name: Test the actual Pages layout, routes and offline cache
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+          CRYPTID_PUBLISHED: '1'
+          CRYPTID_PAGES: '1'
+        run: |
+          python3 scripts/serve.py artifacts/cryptid/wwwroot --port 5011 --base-path "$PAGES_BASE_PATH" --pages > /tmp/cryptid-pages.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          export CRYPTID_BASE_URL="http://127.0.0.1:5011$PAGES_BASE_PATH"
+          npm test --prefix tests/browser
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/cryptid/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -27,7 +27,7 @@ const cubed=(save,c)=>save.Markers.some(m=>m.Piece===0&&same(m.Position,c));
 const own=(save,c)=>save.Markers.some(m=>m.Book===save.Human&&same(m.Position,c));
 const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('cryptid-session-v1')));
 async function start(page, players=3) {
-  await page.goto('/');
+  await page.goto('./');
   await expect(page.getByRole('heading',{name:/One explorer/})).toBeVisible({timeout:60000});
   await page.getByLabel('Clue-holders, including you').selectOption(String(players));
   await page.getByRole('button',{name:/Prepare the board/}).click();
@@ -143,7 +143,7 @@ for(const count of [3,4,5])test(`${count} clue-holders: opening, question, penal
 
 test('phone layout, invalid YAML, and a corrupted saved game fail usefully',async({page})=>{
   await page.setViewportSize({width:390,height:844});
-  await page.goto('/');
+  await page.goto('./');
   await expect(page.getByRole('heading',{name:/One explorer/})).toBeVisible({timeout:60000});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByText('Content packs & printed cards',{exact:true}).click();
@@ -198,7 +198,7 @@ test('completed games move to review history without disturbing a new expedition
     localStorage.setItem('cryptid-session-v1',JSON.stringify(legacy));
     localStorage.removeItem('cryptid-history-v1');
   });
-  await page.goto('/');
+  await page.goto('./');
   await expect(page.getByRole('heading',{name:'Past games',exact:true})).toBeVisible({timeout:60000});
   await expect(page.getByRole('link',{name:/Resume expedition/})).toHaveCount(0);
   const review=await page.getByRole('link',{name:'Review',exact:true}).getAttribute('href');
@@ -207,11 +207,24 @@ test('completed games move to review history without disturbing a new expedition
   await start(page);
   const active=await saved(page);
   expect(active.SessionId).not.toBe(save.SessionId);
-  await page.goto('/'+review);
+  await page.goto(review);
   await expect(page.getByRole('heading',{name:'Back through the field notes.'})).toBeVisible({timeout:60000});
   await expect(page.getByRole('button',{name:/^Search /})).toHaveCount(0);
   expect(await saved(page)).toEqual(active);
   await page.getByRole('link',{name:'Back to camp',exact:true}).click();
   await expect(page.getByRole('link',{name:/Resume expedition/})).toBeVisible();
   await expect(page.getByRole('link',{name:'Review',exact:true})).toHaveCount(1);
+});
+
+test('GitHub Pages direct routes boot from the 404 shell under the repository path',async({page})=>{
+  test.skip(process.env.CRYPTID_PAGES!=='1','Run against a prepared Pages artifact.');
+  const response=await page.goto('settings');
+  expect(response.status()).toBe(404);
+  await expect(page.getByRole('heading',{name:'Display settings',exact:true})).toBeVisible({timeout:60000});
+  const base=new URL(process.env.CRYPTID_BASE_URL);
+  await expect(page.locator('base')).toHaveAttribute('href',base.pathname);
+  const manifest=await page.request.get('manifest.webmanifest');
+  expect(manifest.ok()).toBe(true);
+  const data=await manifest.json();
+  expect(new URL(data.start_url,manifest.url()).pathname).toBe(base.pathname);
 });

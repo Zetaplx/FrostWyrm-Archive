@@ -47,3 +47,7 @@ See [content authoring](docs/cryptid-content.md) for easy YAML layout changes, a
 | `docs` | Architecture, terminology, development parity, and roadmap |
 
 The Core assembly preserves the `FrostWyrm.Archive` namespaces and `FrostWyrm.Initialize()` / `Resolve<T>()` APIs from FrostWyrm. Initialization creates a process-wide singleton and may only run once. The documented per-instance `App` container remains a future milestone.
+
+## GitHub Pages
+
+The deployment workflow publishes the `work` branch to GitHub Pages after solution and browser checks pass. See [Pages setup and deployment](docs/github-pages.md) for the target URL, repository settings, subdirectory routing, and offline validation.
